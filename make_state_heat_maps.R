@@ -68,17 +68,6 @@ for (i in 1:length(states_vec)){
 states.df$community[i] <- sum(communitySCA$Actual.Number.of.Openings[which(communitySCA$Position.State == states_vec[i])])
 }
 
-# now add in full names of states
-#states.df$region <- c("new mexico", "alaska", "pennsylvania", "south dakota", 
-#	"indiana", "north dakota", "district of colombia", "louisiana", "montana",
-#	"texas", "wyoming", "florida", "california", "alabama", "arkansas", 
-#	"minnesota", "colorado", "new york", "georgia", "maryland", "idaho",
-#	"virginia", "washington", "maine", "oregon", "kansas", "ohio", "illinois",
-#	"kentucky", "new jersey", "utah", "missouri", "massachusetts", "mississippi",
-#	"west virginia", "oklahoma", "north carolina", "nebraska", "rhode island",
-#	"new hampshire", "arizona", "virgin islands", "tennessee", "guam", "michigan",
-#	"hawaii", "south carolina", "iowa", "wisconsin", "vermont", "delaware",
-#	"american samoa", "puerto rico", "connecticut", "blank")
 
 library("ggplot2")
 library("maps")
@@ -110,204 +99,96 @@ states.df$id <- c("new mexico", "alaska", "pennsylvania", "south dakota",
 map.df <- merge(fifty_states,states.df, by="id", all.x=T)
 map.df <- map.df[order(map.df$order),]
 
+# Now to make the maps more easily, let's make a function
+SCA_50states <- function(dataset, state_category, title, label){
+
+ggplot(dataset, aes(map_id = id)) + 
+  # map points to the fifty_states shape data
+  geom_map(aes(fill = state_category), map = fifty_states, color = "black") + 
+  expand_limits(x = fifty_states$long, y = fifty_states$lat) +
+  coord_map() +
+  scale_x_continuous(breaks = NULL) + 
+  scale_y_continuous(breaks = NULL) +
+  labs(x = "", y = "") +
+  theme(legend.position = "bottom", 
+        panel.background = element_blank())+ 
+  scale_fill_gradientn(colours=rev(heat.colors(10)),na.value="grey90")+
+  guides(fill = guide_colorbar(direction = "horizontal", title = label, barwidth = 15,
+  label.theme = element_text(angle = 0)))+
+  coord_map() + fifty_states_inset_boxes() + ggtitle(title)
+}
+#####################################################################
+# Now set up the regional maps
+#####################################################################
+library(usmap)
+states.df$state <- states.df$id
+
+Northeast <- function(dataset_ne, category_ne, border_col = "green", start_col = "white", end_col = "green", title_ne, label_ne){
+plot_usmap(
+    data = dataset_ne, values = category_ne, 
+	include = c("ME", "VT", "NH", "MA", "RI", "CT", "NY", "NJ", "PA"), lines = border_col
+  ) + 
+  scale_fill_continuous(
+    low = start_col, high = end_col, name = label_ne, label = scales::comma
+  ) + 
+  labs(title = title_ne) +
+  theme(legend.position = "right")
+}
+
+
+
+
+
+
+#####################################################################
+
+
+
+
 #####################################################################
 # openings per state
 #####################################################################
 
-p <- ggplot(map.df, aes(map_id = id)) + 
-  # map points to the fifty_states shape data
-  geom_map(aes(fill = count.openings.per.state), map = fifty_states) + 
-  expand_limits(x = fifty_states$long, y = fifty_states$lat) +
-  coord_map() +
-  scale_x_continuous(breaks = NULL) + 
-  scale_y_continuous(breaks = NULL) +
-  labs(x = "", y = "") +
-  theme(legend.position = "bottom", 
-        panel.background = element_blank())+ 
-  scale_fill_gradientn(colours=rev(heat.colors(10)),na.value="grey90")+
-  coord_map() 
+SCA_50states(map.df, map.df$count.openings.per.state, "Openings in 2017", "Openings")
 
-p
-
-p + fifty_states_inset_boxes() + ggtitle("Openings in 2017") 
-
+Northeast(states.df, "count.openings.per.state", title_ne = "Openings in 2017", label_ne = "Openings")
 #####################################################################
 # weeks working in each state
 #####################################################################
 
-p1 <- ggplot(map.df, aes(map_id = id)) + 
-  # map points to the fifty_states shape data
-  geom_map(aes(fill = count.weeks.per.state), map = fifty_states, color = "black") + 
-  expand_limits(x = fifty_states$long, y = fifty_states$lat) +
-  coord_map() +
-  scale_x_continuous(breaks = NULL) + 
-  scale_y_continuous(breaks = NULL) +
-  labs(x = "", y = "") +
-  theme(legend.position = "bottom", 
-        panel.background = element_blank())+ 
-  scale_fill_gradientn(colours=rev(heat.colors(10)),na.value="grey90")+
-  coord_map()
+SCA_50states(map.df, map.df$count.weeks.per.state, "SCA Weeks in 2017", "weeks")
 
-p1 + fifty_states_inset_boxes() + ggtitle("SCA weeks in 2017")
-
-
-# trying different colors here
-
-ggplot(map.df, aes(map_id = id)) + 
-  # map points to the fifty_states shape data
-  geom_map(aes(fill = count.weeks.per.state), map = fifty_states, color = "black") + 
-  expand_limits(x = fifty_states$long, y = fifty_states$lat) +
-  coord_map() +
-  scale_fill_gradientn(colours=(topo.colors(3)),na.value="grey90")+
-  coord_map()
-
-ggplot(map.df, aes(map_id = id)) + 
-  # map points to the fifty_states shape data
-  geom_map(aes(fill = count.weeks.per.state), map = fifty_states, color = "black") + 
-  expand_limits(x = fifty_states$long, y = fifty_states$lat) +
-  coord_map() +
-  scale_x_continuous(breaks = NULL) + 
-  scale_y_continuous(breaks = NULL) +
-  labs(x = "", y = "") +
-  theme(legend.position = "bottom", 
-        panel.background = element_blank())+ 
-scale_fill_gradientn(colours=(rainbow(10, start = .13, end = 1)),na.value="grey40") +
-guides(fill = guide_colorbar(direction = "horizontal", title = "miles", barwidth = 15,
-label.theme = element_text(angle = 0)))+
- coord_map()
-
-
-rainbow(4, start = 0, end = 0.25)[z])
-# slightly alter rainbow palette
-rainbow <- rainbow(n, s = 1, v = 1, start = 1/8, end = max(1, n - 1)/n, alpha = 1)
-
-# Color options so far
-scale_fill_gradient(low = "yellow", high = "green", na.value = "grey90") --a two color scale...
-scale_fill_gradientn(colours=rev(heat.colors(10)),na.value="grey90") --heat colors in reverse...
- scale_fill_gradientn(colours=palette(),na.value="grey90")
-
-
-
-library(colorspace)
-library(RColorBrewer)
-scale_colour_gradient(low = "white", high = "black")
+Pacific(states.df, "count.weeks.per.state", title_ne = "SCA weeks in 2017", label_ne = "Weeks")
 
 #####################################################################
 # weeks per member per state
 #####################################################################
-
-p2 <- ggplot(map.df, aes(map_id = id)) + 
-  # map points to the fifty_states shape data
-  geom_map(aes(fill = count.weeks.per.member), map = fifty_states) + 
-  expand_limits(x = fifty_states$long, y = fifty_states$lat) +
-  coord_map() +
-  scale_x_continuous(breaks = NULL) + 
-  scale_y_continuous(breaks = NULL) +
-  labs(x = "", y = "") +
-  theme(legend.position = "bottom", 
-        panel.background = element_blank())+ 
-  scale_fill_gradientn(colours=rev(heat.colors(10)),na.value="grey90")+
-  coord_map()
-
-p2 + fifty_states_inset_boxes() + ggtitle("SCA weeks per member in 2017")
-# colors seem most even here because the range is narrower
-
-head(SCA)
+SCA_50states(map.df, map.df$count.weeks.per.member, "SCA Weeks per member in 2017", "weeks per member")
 
 #####################################################################
 # positions per state
 #####################################################################
-
-p3 <- ggplot(map.df, aes(map_id = id)) + 
-  # map points to the fifty_states shape data
-  geom_map(aes(fill = count.positions), map = fifty_states) + 
-  expand_limits(x = fifty_states$long, y = fifty_states$lat) +
-  coord_map() +
-  scale_x_continuous(breaks = NULL) + 
-  scale_y_continuous(breaks = NULL) +
-  labs(x = "", y = "") +
-  theme(legend.position = "bottom", 
-        panel.background = element_blank())+ 
-  scale_fill_gradientn(colours=rev(heat.colors(10)),na.value="grey90")+
-  coord_map()
-
-p3 + fifty_states_inset_boxes() + ggtitle("SCA position distribution 2017")
+SCA_50states(map.df, map.df$count.positions, "SCA position distribution 2017", "Positions") 
 
 #####################################################################
 # internships per state
 #####################################################################
-
-p4 <- ggplot(map.df, aes(map_id = id)) + 
-  # map points to the fifty_states shape data
-  geom_map(aes(fill = intern), map = fifty_states) + 
-  expand_limits(x = fifty_states$long, y = fifty_states$lat) +
-  coord_map() +
-  scale_x_continuous(breaks = NULL) + 
-  scale_y_continuous(breaks = NULL) +
-  labs(x = "", y = "") +
-  theme(legend.position = "bottom", 
-        panel.background = element_blank())+ 
-  scale_fill_gradientn(colours=rev(heat.colors(10)),na.value="grey90")+
-  coord_map()
-
-p4 + fifty_states_inset_boxes() + ggtitle("SCA internship distribution 2017")
+SCA_50states(map.df, map.df$intern, "SCA internship distribution 2017", "Positions")
 
 #####################################################################
 # crew openings per state
 #####################################################################
-
-p5 <- ggplot(map.df, aes(map_id = id)) + 
-  # map points to the fifty_states shape data
-  geom_map(aes(fill = crew), map = fifty_states) + 
-  expand_limits(x = fifty_states$long, y = fifty_states$lat) +
-  coord_map() +
-  scale_x_continuous(breaks = NULL) + 
-  scale_y_continuous(breaks = NULL) +
-  labs(x = "", y = "") +
-  theme(legend.position = "bottom", 
-        panel.background = element_blank())+ 
-  scale_fill_gradientn(colours=rev(heat.colors(10)),na.value="grey90")+
-  coord_map()
-
-p5 + fifty_states_inset_boxes() + ggtitle("SCA crew distribution 2017")
+SCA_50states(map.df, map.df$crew, "SCA crew distribution 2017", "Positions")
 
 ##########################################################################################################################################
 # corps openings per state
 #####################################################################
-
-p6 <- ggplot(map.df, aes(map_id = id)) + 
-  # map points to the fifty_states shape data
-  geom_map(aes(fill = corps), map = fifty_states) + 
-  expand_limits(x = fifty_states$long, y = fifty_states$lat) +
-  coord_map() +
-  scale_x_continuous(breaks = NULL) + 
-  scale_y_continuous(breaks = NULL) +
-  labs(x = "", y = "") +
-  theme(legend.position = "bottom", 
-        panel.background = element_blank())+ 
-  scale_fill_gradientn(colours=rev(heat.colors(10)),na.value="grey90")+
-  coord_map()
-
-p6 + fifty_states_inset_boxes() + ggtitle("SCA corps distribution 2017")
+SCA_50states(map.df, map.df$corps, "SCA corps distribution 2017", "Positions")
 
 ##########################################################################################################################################
-# community openings per state  ##this one looks off
+# community openings per state  
 #####################################################################
-
-p7 <- ggplot(map.df, aes(map_id = id)) + 
-  # map points to the fifty_states shape data
-  geom_map(aes(fill = corps), map = fifty_states) + 
-  expand_limits(x = fifty_states$long, y = fifty_states$lat) +
-  coord_map() +
-  scale_x_continuous(breaks = NULL) + 
-  scale_y_continuous(breaks = NULL) +
-  labs(x = "", y = "") +
-  theme(legend.position = "bottom", 
-        panel.background = element_blank())+ 
-  scale_fill_gradientn(colours=rev(heat.colors(10)),na.value="grey90")+
-  coord_map()
-
-p7 + fifty_states_inset_boxes() + ggtitle("SCA community distribution 2017")
+SCA_50states(map.df, map.df$community, "SCA community distribution 2017", "Positions")
 
 #####################################################################
 # regional focus
