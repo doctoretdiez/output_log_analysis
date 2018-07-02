@@ -69,21 +69,9 @@ states.df$community[i] <- sum(communitySCA$Actual.Number.of.Openings[which(commu
 }
 
 
-library("ggplot2")
-library("maps")
-#map('state')
-
-
 #####################################################################
-# setting up 50-state map
+# make sure the map functions have been loaded
 #####################################################################
-
-# we have a preliminary heat map...
-
-# for all fifty states
-library("fiftystater")
-library("mapproj")
-library("scales")
 
 states.df$id <- c("new mexico", "alaska", "pennsylvania", "south dakota", 
 	"indiana", "north dakota", "district of colombia", "louisiana", "montana",
@@ -99,52 +87,6 @@ states.df$id <- c("new mexico", "alaska", "pennsylvania", "south dakota",
 map.df <- merge(fifty_states,states.df, by="id", all.x=T)
 map.df <- map.df[order(map.df$order),]
 
-# Now to make the maps more easily, let's make a function
-SCA_50states <- function(dataset, state_category, title, label){
-
-ggplot(dataset, aes(map_id = id)) + 
-  # map points to the fifty_states shape data
-  geom_map(aes(fill = state_category), map = fifty_states, color = "black") + 
-  expand_limits(x = fifty_states$long, y = fifty_states$lat) +
-  coord_map() +
-  scale_x_continuous(breaks = NULL) + 
-  scale_y_continuous(breaks = NULL) +
-  labs(x = "", y = "") +
-  theme(legend.position = "bottom", 
-        panel.background = element_blank())+ 
-  scale_fill_gradientn(colours=rev(heat.colors(10)),na.value="grey90")+
-  guides(fill = guide_colorbar(direction = "horizontal", title = label, barwidth = 15,
-  label.theme = element_text(angle = 0)))+
-  coord_map() + fifty_states_inset_boxes() + ggtitle(title)
-}
-#####################################################################
-# Now set up the regional maps
-#####################################################################
-library(usmap)
-states.df$state <- states.df$id
-
-Northeast <- function(dataset_ne, category_ne, border_col = "green", start_col = "white", end_col = "green", title_ne, label_ne){
-plot_usmap(
-    data = dataset_ne, values = category_ne, 
-	include = c("ME", "VT", "NH", "MA", "RI", "CT", "NY", "NJ", "PA"), lines = border_col
-  ) + 
-  scale_fill_continuous(
-    low = start_col, high = end_col, name = label_ne, label = scales::comma
-  ) + 
-  labs(title = title_ne) +
-  theme(legend.position = "right")
-}
-
-
-
-
-
-
-#####################################################################
-
-
-
-
 #####################################################################
 # openings per state
 #####################################################################
@@ -152,6 +94,85 @@ plot_usmap(
 SCA_50states(map.df, map.df$count.openings.per.state, "Openings in 2017", "Openings")
 
 Northeast(states.df, "count.openings.per.state", title_ne = "Openings in 2017", label_ne = "Openings")
+
+
+# alternative representation
+library("ggplot2")
+gusa <- map_data("state")
+states.df$state <- c("new mexico", "alaska", "pennsylvania", "south dakota", 
+	"indiana", "north dakota", "district of colombia", "louisiana", "montana",
+	"texas", "wyoming", "florida", "california", "alabama", "arkansas", 
+	"minnesota", "colorado", "new york", "georgia", "maryland", "idaho",
+	"virginia", "washington", "maine", "oregon", "kansas", "ohio", "illinois",
+	"kentucky", "new jersey", "utah", "missouri", "massachusetts", "mississippi",
+	"west virginia", "oklahoma", "north carolina", "nebraska", "rhode island",
+	"new hampshire", "arizona", "virgin islands", "tennessee", "guam", "michigan",
+	"hawaii", "south carolina", "iowa", "wisconsin", "vermont", "delaware",
+	"american samoa", "puerto rico", "connecticut", "blank")
+
+
+state_centroids <- summarize(group_by(gusa, region),
+                             x = mean(range(long)), y = mean(range(lat)))
+names(state_centroids)[1] <- "state"
+head(state_centroids)
+head(states.df)
+
+map("state")
+#with(state_centroids, points(x, y))
+
+states.df <- left_join(states.df, state_centroids, "state")
+
+with(states.df,
+     symbols(x, y,
+             circles = sqrt(count.openings.per.state), add = TRUE,
+             inches = 0.1, bg = "black"))
+# ggplot version
+ggplot(gusa) +
+    geom_polygon(aes(long, lat, group = group),
+                 fill = NA, color = "grey") +
+    geom_point(aes(x, y, size = count.openings.per.state), data = states.df) +
+    scale_size_area() +
+    coord_map("bonne", parameters=45) 
+
+############### in quintiles instead of a continuous scale
+spr <- select(states.df, region, count.openings.per.state)
+spr <- slice(spr, 1:54)
+ncls <- 10
+spr <- mutate(spr,
+              pcls = cut(count.openings.per.state, quantile(count.openings.per.state, seq(0, 1, len = ncls)),
+                         include.lowest = TRUE))
+
+gusa_spr <- left_join(states.df, spr, "region")
+
+# with non ggplot
+map("state")$names
+usa_pcls <- spr$pcls[match(map("state")$names, spr$region)]
+pal <- RColorBrewer::brewer.pal(nlevels(usa_pcls), "Reds")
+map("state", fill = TRUE, col = pal[usa_pcls], border = "grey")
+###### can change the color scheme based on how many ncls!!!
+
+# how to see only one state while in ggplot?
+ggplot(filter(region == "illinois")) + coord_map()
+# https://homepage.divms.uiowa.edu/~luke/classes/STAT4580/maps.html
+
+################# statebins!
+library("statebins")
+states.df_edit <- slice(states.df, c(1:6, 8:41, 43, 45:51, 54))
+states.df_edit$state <- as.character(states.df_edit$states_vec)
+statebins_continuous(states.df_edit, value_col = "count.openings.per.state")
+
+# now in quartiles...
+statebin.df <- select(states.df, states_vec, count.openings.per.state)
+statebin.df <- slice(statebin.df, 1:54)
+ncls <- 4
+statebin.df <- mutate(statebin.df,
+              pcls = cut(count.openings.per.state, quantile(count.openings.per.state, seq(0, 1, len = ncls)),
+                         include.lowest = TRUE))
+statebin.df$rank <- as.numeric(statebin.df$pcls)
+statebins(statebin.df, value_col = statebin.df$rank)
+###########unsure why this is not working...
+
+
 #####################################################################
 # weeks working in each state
 #####################################################################
@@ -191,12 +212,23 @@ SCA_50states(map.df, map.df$corps, "SCA corps distribution 2017", "Positions")
 SCA_50states(map.df, map.df$community, "SCA community distribution 2017", "Positions")
 
 #####################################################################
-# regional focus
+# 
 #####################################################################
 
 # try looking at regions individually:
 # only does lower 48...
 states <- map_data("state")
+
+states.df$region <- c("new mexico", "alaska", "pennsylvania", "south dakota", 
+	"indiana", "north dakota", "district of colombia", "louisiana", "montana",
+	"texas", "wyoming", "florida", "california", "alabama", "arkansas", 
+	"minnesota", "colorado", "new york", "georgia", "maryland", "idaho",
+	"virginia", "washington", "maine", "oregon", "kansas", "ohio", "illinois",
+	"kentucky", "new jersey", "utah", "missouri", "massachusetts", "mississippi",
+	"west virginia", "oklahoma", "north carolina", "nebraska", "rhode island",
+	"new hampshire", "arizona", "virgin islands", "tennessee", "guam", "michigan",
+	"hawaii", "south carolina", "iowa", "wisconsin", "vermont", "delaware",
+	"american samoa", "puerto rico", "connecticut", "blank")
 
 map48.df <- merge(states,states.df, by="region", all.x=T)
 map48.df <- map.df[order(map48.df$order),]
@@ -207,7 +239,30 @@ ggplot(map48.df, aes(x=long,y=lat,group=group))+
   coord_map()
 
 
-# usmap package soln--not in ggplot...
+
+## using quintile bins instead of a continuous scale
+spr <- select(states.df, region, count.openings.per.state)
+spr <- slice(spr, 1:54)
+ncls <- 6
+spr <- mutate(spr,
+              pcls = cut(count.openings.per.state, quantile(count.openings.per.state, seq(0, 1, len = ncls)),
+                         include.lowest = TRUE))
+
+gusa_spr <- left_join(states.df, spr, "region")
+
+# with non ggplot
+map("state")$names
+usa_pcls <- spr$pcls[match(map("state")$names, spr$region)]
+pal <- RColorBrewer::brewer.pal(nlevels(usa_pcls), "Reds")
+map("state", fill = TRUE, col = pal[usa_pcls], border = "grey")
+
+#using statebins! 7.2.18
+data(USArrests)
+USArrests$state <- rownames(USArrests)
+statebins_continuous(USArrests, value_col="Murder", text_color="black", font_size=3,
+                     legend_title = "Murder", legend_position="bottom")
+
+usmap package soln--not in ggplot...
 library(usmap)
 # example with population in west
 plot_usmap(
@@ -220,42 +275,6 @@ plot_usmap(
   theme(legend.position = "right")
 
 states.df$state <- states.df$id
-
-#Northeast
-plot_usmap(
-    data = states.df, values = "count.openings.per.state", 
-	include = c("ME", "VT", "NH", "MA", "RI", "CT", "NY", "NJ", "PA"), lines = "green"
-  ) + 
-  scale_fill_continuous(
-    low = "white", high = "green", name = "SCA Openings (2017)", label = scales::comma
-  ) + 
-  labs(title = "Northeastern US States") +
-  theme(legend.position = "right")
-
-
-# Southeast
-plot_usmap(
-    data = states.df, values = "count.openings.per.state", 
-	include = c("MD", "DE", "VA", "WV", "KY", "TN", "NC", "SC", "GA"), lines = "darkgreen"
-  ) + 
-  scale_fill_continuous(
-    low = "white", high = "darkgreen", name = "SCA Openings (2017)", label = scales::comma
-  ) + 
-  labs(title = "Southeastern US States") +
-  theme(legend.position = "right")
-
-
-# Midwest
-plot_usmap(
-    data = states.df, values = "count.openings.per.state", 
-	include = c("OH", "MI", "IN", "IL", "WI", "MN", "IA", "ND", 
-	"SD", "NE", "KS", "OK", "AR", "MO"), lines = "salmon"
-  ) + 
-  scale_fill_continuous(
-    low = "white", high = "salmon", name = "SCA Openings (2017)", label = scales::comma
-  ) + 
-  labs(title = "Midwestern US States") +
-  theme(legend.position = "right")
 
 
 
@@ -278,26 +297,6 @@ p <- p + geom_point( data=mydata, aes(x=long, y=lat, size = enrollment), color="
 p <- p + geom_text( data=mydata, hjust=0.5, vjust=-0.5, aes(x=long, y=lat, label=label), colour="gold2", size=4 )
 p
 
-
-#################################################### APPENDIX
-06.21.18
-### raster soln to looking at regions one at a time
-#library(raster)
-#states2    <- c('California', 'Nevada', 'Utah', 'Colorado', 'Wyoming', 'Montana', 'Idaho', 'Oregon', 'Washington')
-#provinces <- c("British Columbia", "Alberta")
-
-#us <- getData("GADM",country="USA",level=1)
-#canada <- getData("GADM",country="CAN",level=1)
-
-#us.states <- us[us$NAME_1 %in% states2,]
-#ca.provinces <- canada[canada$NAME_1 %in% provinces,]
-
-#us.bbox <- bbox(us.states)
-#ca.bbox <- bbox(ca.provinces)
-#xlim <- c(min(us.bbox[1,1],ca.bbox[1,1]),max(us.bbox[1,2],ca.bbox[1,2]))
-#ylim <- c(min(us.bbox[2,1],ca.bbox[2,1]),max(us.bbox[2,2],ca.bbox[2,2]))
-#plot(us.states, xlim=xlim, ylim=ylim)
-#plot(ca.provinces, xlim=xlim, ylim=ylim, add=T)
 
 #library(ggplot2)
 #ggplot(us.states,aes(x=long,y=lat,group=group))+
