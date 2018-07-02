@@ -7,11 +7,14 @@
 
 # load necessary packages
 library(ggplot2)
+library("fiftystater")
+library("maps")
+library("mapproj")
+library("usmap")
 
 ###########################################################################
 # normal 50 states with reverse heat colors
 SCA_50states <- function(dataset, state_category, title, label){
-
 ggplot(dataset, aes(map_id = id)) + 
   # map points to the fifty_states shape data
   geom_map(aes(fill = state_category), map = fifty_states, color = "black") + 
@@ -28,11 +31,11 @@ ggplot(dataset, aes(map_id = id)) +
   coord_map() + fifty_states_inset_boxes() + ggtitle(title)
 }
 
+
 ###########################################################################
 # 50 states with rainbows
 
 SCA_50states_rb <- function(dataset, state_category, title, label){
-
 ggplot(dataset, aes(map_id = id)) + 
   # map points to the fifty_states shape data
   geom_map(aes(fill = state_category), map = fifty_states, color = "black") + 
@@ -51,8 +54,8 @@ ggplot(dataset, aes(map_id = id)) +
 
 ###########################################################################
 # 50 states with color options
-SCA_50states_color <- function(dataset, state_category, title, label, start, end){
 
+SCA_50states_color <- function(dataset, state_category, title, label, start, end){
 ggplot(dataset, aes(map_id = id)) + 
   # map points to the fifty_states shape data
   geom_map(aes(fill = state_category), map = fifty_states, color = "black") + 
@@ -70,7 +73,7 @@ scale_fill_gradient(low = start, high = end, na.value = "grey90") +
 }
 
 ###########################################################################
-#REGIONAL MAPS
+#REGIONAL MAPS # unsure how to do in ggplot at the moment
 
 Northeast <- function(dataset_ne, category_ne, border_col = "green", start_col = "white", end_col = "green", title_ne, label_ne){
 plot_usmap(
