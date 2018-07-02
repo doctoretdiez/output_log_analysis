@@ -116,9 +116,12 @@ for (i in 1:length(states_vec)){
 states.output$water.debris.per.state[i] <- (sum(water_debris_rows$How.Much.You.Did[which(water_debris_rows$Position..Position.State == states_vec[i])]))/5280
 }
 
-
+###########################################
+###########################################
+###########################################
+###########################################
 ########################################### Now time to apply these to maps
-
+###########################################
 ########### set up 50-state map#################
 library("fiftystater")
 library("mapproj")
@@ -200,19 +203,165 @@ scale_fill_gradient(low = start, high = end, na.value = "grey90") +
 # plus the title and label you will give it.
 
 # if using the special color function, then also include the low and high colors.
-#####################################################################
+
+##################################################################
+# set up regional maps for quick use also
+# unsure how to do in ggplot at the moment
+library(usmap)
+
+# very important to do this one first
+states.output$state <- states.output$id
+
+#make a function
+
+Northeast <- function(dataset_ne, category_ne, border_col = "green", start_col = "white", end_col = "green", title_ne, label_ne){
+plot_usmap(
+    data = dataset_ne, values = category_ne, 
+	include = c("ME", "VT", "NH", "MA", "RI", "CT", "NY", "NJ", "PA"), lines = border_col
+  ) + 
+  scale_fill_continuous(
+    low = start_col, high = end_col, name = label_ne, label = scales::comma
+  ) + 
+  labs(title = title_ne) +
+  theme(legend.position = "right")
+}
+
+Southeast <- function(dataset_ne, category_ne,  border_col = "darkgreen", start_col = "white", end_col = "darkgreen", title_ne, label_ne){
+plot_usmap(
+    data = dataset_ne, values = category_ne, 
+	include = c("MD", "DE", "VA", "WV", "KY", "TN", "NC", "SC", "GA"), lines = border_col
+  ) + 
+  scale_fill_continuous(
+    low = start_col, high = end_col, name = label_ne, label = scales::comma
+  ) + 
+  labs(title = title_ne) +
+  theme(legend.position = "right")
+}
+
+Midwest <- function(dataset_ne, category_ne,  border_col = "salmon", start_col = "white", end_col = "salmon", title_ne, label_ne){
+plot_usmap(
+    data = dataset_ne, values = category_ne, 
+	include = c("OH", "MI", "IN", "IL", "WI", "MN", "IA", "ND", 
+	"SD", "NE", "KS", "OK", "AR", "MO"), lines = border_col
+ ) + 
+  scale_fill_continuous(
+    low = start_col, high = end_col, name = label_ne, label = scales::comma
+  ) + 
+  labs(title = title_ne) +
+  theme(legend.position = "right")
+}
+
+South <- function(dataset_ne, category_ne,  border_col = "firebrick", start_col = "white", end_col = "firebrick", title_ne, label_ne){
+plot_usmap(
+ data = dataset_ne, values = category_ne, 
+	include = c("FL", "MS", "AL", "LA", "TX"), lines = border_col
+ ) + 
+  scale_fill_continuous(
+    low = start_col, high = end_col, name = label_ne, label = scales::comma
+  ) + 
+  labs(title = title_ne) +
+  theme(legend.position = "right")
+}
+
+Mountains <- function(dataset_ne, category_ne,  border_col = "powderblue", start_col = "white", end_col = "powderblue", title_ne, label_ne){
+plot_usmap(
+ data = dataset_ne, values = category_ne, 
+	include = c("ID", "MT", "WY", "UT", "CO", "NM"), lines = border_col
+ ) + 
+  scale_fill_continuous(
+    low = start_col, high = end_col, name = label_ne, label = scales::comma
+  ) + 
+  labs(title = title_ne) +
+  theme(legend.position = "right")
+}
+
+Southwest <- function(dataset_ne, category_ne,  border_col = "dodgerblue3", start_col = "white", end_col = "dodgerblue3", title_ne, label_ne){
+plot_usmap(
+ data = dataset_ne, values = category_ne, 
+	include = c("CA", "NV", "AZ"), lines = border_col
+ ) + 
+  scale_fill_continuous(
+    low = start_col, high = end_col, name = label_ne, label = scales::comma
+  ) + 
+  labs(title = title_ne) +
+  theme(legend.position = "right")
+}
+
+Northwest <- function(dataset_ne, category_ne,  border_col = "slateblue4", start_col = "white", end_col = "slateblue4", title_ne, label_ne){
+plot_usmap(
+ data = dataset_ne, values = category_ne, 
+	include = c("WA", "OR"), lines = border_col
+ ) + 
+  scale_fill_continuous(
+    low = start_col, high = end_col, name = label_ne, label = scales::comma
+  ) + 
+  labs(title = title_ne) +
+  theme(legend.position = "right")
+}
+
+Pacific <- function(dataset_ne, category_ne,  border_col = "turquoise1", start_col = "white", end_col = "turquoise1", title_ne, label_ne){
+plot_usmap(
+ data = dataset_ne, values = category_ne, 
+	include = c("AK", "HI"), lines = border_col
+ ) + 
+  scale_fill_continuous(
+    low = start_col, high = end_col, name = label_ne, label = scales::comma
+  ) + 
+  labs(title = title_ne) +
+  theme(legend.position = "right")
+}
+##################################################################################
+##################################################################################
+##################################################################################
+##################################################################################
+#
+# Now that the functions are loaded in, you can run the below and make some maps!
+#
+##################################################################################
+##################################################################################
+##################################################################################
+##################################################################################
+##################################################################################
 # new trail per state
 SCA_50states_color(map.output, map.output$new.trail.per.state, 
 "New Trail Built in 2017", "Miles", "white", "sienna")
+
+Southwest(states.output, "new.trail.per.state", title_ne = "New Trail built in 2017", label_ne = "Miles")
+Midwest(states.output, "new.trail.per.state", title_ne = "New Trail built in 2017", label_ne = "Miles")
+Northeast(states.output, "new.trail.per.state", title_ne = "New Trail built in 2017", label_ne = "Miles")
+Northwest(states.output, "new.trail.per.state", title_ne = "New Trail built in 2017", label_ne = "Miles")
+Pacific(states.output, "new.trail.per.state", title_ne = "New Trail built in 2017", label_ne = "Miles")
+South(states.output, "new.trail.per.state", title_ne = "New Trail built in 2017", label_ne = "Miles")
+Mountains(states.output, "new.trail.per.state", title_ne = "New Trail built in 2017", label_ne = "Miles")
+Southeast(states.output, "new.trail.per.state", title_ne = "New Trail built in 2017", label_ne = "Miles")
+
 
 #####################################################################
 # maintained trail per state
 SCA_50states_color(map.output, map.output$maintain.trail.per.state, 
 "Miles of Trail Maintained in 2017", "Miles", "white", "sienna")
 
+Southwest(states.output, "maintain.trail.per.state", title_ne = "Miles of Trail Maintained in 2017", label_ne = "Miles")
+Northwest(states.output, "maintain.trail.per.state", title_ne = "Miles of Trail Maintained in 2017", label_ne = "Miles")
+Pacific(states.output, "maintain.trail.per.state", title_ne = "Miles of Trail Maintained in 2017", label_ne = "Miles")
+Mountains(states.output, "maintain.trail.per.state", title_ne = "Miles of Trail Maintained in 2017", label_ne = "Miles")
+South(states.output, "maintain.trail.per.state", title_ne = "Miles of Trail Maintained in 2017", label_ne = "Miles")
+Southeast(states.output, "maintain.trail.per.state", title_ne = "Miles of Trail Maintained in 2017", label_ne = "Miles")
+Midwest(states.output, "maintain.trail.per.state", title_ne = "Miles of Trail Maintained in 2017", label_ne = "Miles")
+Northeast(states.output, "maintain.trail.per.state", title_ne = "Miles of Trail Maintained in 2017", label_ne = "Miles")
+
 #####################################################################
 # acres burned per state
 SCA_50states(map.output, map.output$burns.per.state, "Acres burned in 2017", "Acres")
+
+Pacific(states.output, "burns.per.state", title_ne = "Acres burned in 2017", label_ne = "Acres")
+Southwest(states.output, "burns.per.state", title_ne = "Acres burned in 2017", label_ne = "Acres")
+Northwest(states.output, "burns.per.state", title_ne = "Acres burned in 2017", label_ne = "Acres")
+Mountains(states.output, "burns.per.state", title_ne = "Acres burned in 2017", label_ne = "Acres")
+Midwest(states.output, "burns.per.state", title_ne = "Acres burned in 2017", label_ne = "Acres")
+South(states.output, "burns.per.state", title_ne = "Acres burned in 2017", label_ne = "Acres")
+Southeast(states.output, "burns.per.state", title_ne = "Acres burned in 2017", label_ne = "Acres")
+Northeast(states.output, "burns.per.state", title_ne = "Acres burned in 2017", label_ne = "Acres")
 
 #####################################################################
 # acres trash cleared per state
@@ -222,9 +371,17 @@ SCA_50states_color(map.output, map.output$trashout.per.state,
 SCA_50states(map.output, map.output$trashout.per.state, 
 "Acres cleared of trash in 2017", "Acres")
 
+Mountains(states.output, "trashout.per.state", title_ne = "Acres cleared on trash in 2017", label_ne = "Acres")
 #####################################################################
 # acres invasive cleared per state
 SCA_50states(map.output, map.output$invasive.per.state, "Acres cleared of invasives in 2017", "Acres")
+
+South(states.output, "invasive.per.state", title_ne = "Acres cleared of invasives in 2017", label_ne = "Acres")
+Southeast(states.output, "invasive.per.state", title_ne = "Acres cleared of invasives in 2017", label_ne = "Acres")
+Midwest(states.output, "invasive.per.state", title_ne = "Acres cleared of invasives in 2017", label_ne = "Acres")
+South(states.output, "invasive.per.state", title_ne = "Acres cleared of invasives in 2017", label_ne = "Acres")
+Pacific(states.output, "invasive.per.state", title_ne = "Acres cleared of invasives in 2017", label_ne = "Acres")
+Southwest(states.output, "invasive.per.state", title_ne = "Acres cleared of invasives in 2017", label_ne = "Acres")
 
 #####################################################################
 # try rainbow palette for people?
@@ -238,9 +395,27 @@ SCA_50states(map.output, map.output$tabling.per.state,
 SCA_50states_rb(map.output, map.output$tabling.per.state, 
 "People encountered while tabling in 2017", "People")
 
+Northeast(states.output, "tabling.per.state", title_ne = "People encountered while tabling 2017", label_ne = "People")
+Southeast(states.output, "tabling.per.state", title_ne = "People encountered while tabling 2017", label_ne = "People")
+South(states.output, "tabling.per.state", title_ne = "People encountered while tabling 2017", label_ne = "People")
+Midwest(states.output, "tabling.per.state", title_ne = "People encountered while tabling 2017", label_ne = "People")
+Mountains(states.output, "tabling.per.state", title_ne = "People encountered while tabling 2017", label_ne = "People")
+Northwest(states.output, "tabling.per.state", title_ne = "People encountered while tabling 2017", label_ne = "People")
+Southwest(states.output, "tabling.per.state", title_ne = "People encountered while tabling 2017", label_ne = "People")
+Pacific(states.output, "tabling.per.state", title_ne = "People encountered while tabling 2017", label_ne = "People")
+
 #####################################################################
 # people encountered at visitor center per state
 SCA_50states_rb(map.output, map.output$visitor.per.state, "Visitors encountered in 2017", "People")
+
+Northeast(states.output, "visitor.per.state", title_ne = "Visitors encountered in 2017", label_ne = "People")
+Southeast(states.output, "visitor.per.state", title_ne = "Visitors encountered in 2017", label_ne = "People")
+South(states.output, "visitor.per.state", title_ne = "Visitors encountered in 2017", label_ne = "People")
+Midwest(states.output, "visitor.per.state", title_ne = "Visitors encountered in 2017", label_ne = "People")
+Mountains(states.output, "visitor.per.state", title_ne = "Visitors encountered in 2017", label_ne = "People")
+Northwest(states.output, "visitor.per.state", title_ne = "Visitors encountered in 2017", label_ne = "People")
+Southwest(states.output, "visitor.per.state", title_ne = "Visitors encountered in 2017", label_ne = "People")
+Pacific(states.output, "visitor.per.state", title_ne = "Visitors encountered in 2017", label_ne = "People")
 
 #####################################################################
 # volunteers recruited per state
@@ -254,6 +429,11 @@ SCA_50states_rb(map.output, map.output$tour.per.state, "People attending SCA tou
 # people educated in classroom per state
 SCA_50states_rb(map.output, map.output$curriculum.per.state, "People educated in classrooms in 2017", "People")
 
+South(states.output, "curriculum.per.state", title_ne = "People educated in classrooms", label_ne = "People")
+Southeast(states.output, "curriculum.per.state", title_ne = "People educated in classrooms", label_ne = "People")
+Midwest(states.output, "curriculum.per.state", title_ne = "People educated in classrooms", label_ne = "People")
+Northeast(states.output, "curriculum.per.state", title_ne = "People educated in classrooms", label_ne = "People")
+
 #####################################################################
 # miles of shoreline cleared of natural debris per state  
 SCA_50states_color(map.output, map.output$water.debris.per.state, 
@@ -263,7 +443,9 @@ SCA_50states_color(map.output, map.output$water.debris.per.state,
 # miles of shoreline cleared of trash per state
 SCA_50states_color(map.output, map.output$water.trashout.per.state, 
 "Miles of shoreline cleared of trash in 2017", "Miles", "white", "blue")
+* note that nevada looks grey, but that is just the default NA color.
 
+Southeast(states.output, "water.trashout.per.state", title_ne = "Miles of shoreline cleared of trash 2017", label_ne = "Miles")
 #####################################################################
 # miles of shoreline cleared of invasives per state
 SCA_50states_color(map.output, map.output$water.invasive.per.state, 
