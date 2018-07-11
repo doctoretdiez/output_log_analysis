@@ -84,6 +84,7 @@ states.df$id <- c("new mexico", "alaska", "pennsylvania", "south dakota",
 	"hawaii", "south carolina", "iowa", "wisconsin", "vermont", "delaware",
 	"american samoa", "puerto rico", "connecticut", "blank")
 
+states.df$state <- states.df$id
 map.df <- merge(fifty_states,states.df, by="id", all.x=T)
 map.df <- map.df[order(map.df$order),]
 
@@ -91,7 +92,7 @@ map.df <- map.df[order(map.df$order),]
 # openings per state
 #####################################################################
 
-SCA_50states(map.df, map.df$count.openings.per.state, "Openings in 2017", "Openings")
+SCA_50states(map.df, map.df$count.openings.per.state, "SCA Openings 2017", "Openings")
 
 Northeast(states.df, "count.openings.per.state", title_ne = "Openings in 2017", label_ne = "Openings")
 
@@ -135,18 +136,18 @@ ggplot(gusa) +
     coord_map("bonne", parameters=45) 
 
 ############### in quintiles instead of a continuous scale
-spr <- select(states.df, region, count.openings.per.state)
+spr <- select(states.df, state, count.openings.per.state)
 spr <- slice(spr, 1:54)
 ncls <- 10
 spr <- mutate(spr,
               pcls = cut(count.openings.per.state, quantile(count.openings.per.state, seq(0, 1, len = ncls)),
                          include.lowest = TRUE))
 
-gusa_spr <- left_join(states.df, spr, "region")
+gusa_spr <- left_join(states.df, spr, "state")
 
 # with non ggplot
 map("state")$names
-usa_pcls <- spr$pcls[match(map("state")$names, spr$region)]
+usa_pcls <- spr$pcls[match(map("state")$names, spr$state)]
 pal <- RColorBrewer::brewer.pal(nlevels(usa_pcls), "Reds")
 map("state", fill = TRUE, col = pal[usa_pcls], border = "grey")
 ###### can change the color scheme based on how many ncls!!!
@@ -177,7 +178,7 @@ statebins(statebin.df, value_col = statebin.df$rank)
 # weeks working in each state
 #####################################################################
 
-SCA_50states(map.df, map.df$count.weeks.per.state, "SCA Weeks in 2017", "weeks")
+SCA_50states(map.df, map.df$count.weeks.per.state, "SCA Weeks 2017", "weeks")
 
 Pacific(states.df, "count.weeks.per.state", title_ne = "SCA weeks in 2017", label_ne = "Weeks")
 
