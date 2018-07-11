@@ -126,10 +126,26 @@ states.output$water.debris.per.state[i] <- (sum(water_debris_rows$How.Much.You.D
 # make sure the functions have been loaded in.
 
 # very important to do this one first
+states.output$id <- c("new mexico", "alaska", "pennsylvania", "south dakota", 
+	"indiana", "north dakota", "district of colombia", "louisiana", "montana",
+	"texas", "wyoming", "florida", "california", "alabama", "arkansas", 
+	"minnesota", "colorado", "new york", "georgia", "maryland", "idaho",
+	"virginia", "washington", "maine", "oregon", "kansas", "ohio", "illinois",
+	"kentucky", "new jersey", "utah", "missouri", "massachusetts", "mississippi",
+	"west virginia", "oklahoma", "north carolina", "nebraska", "rhode island",
+	"new hampshire", "arizona", "virgin islands", "tennessee", "guam", "michigan",
+	"hawaii", "south carolina", "iowa", "wisconsin", "vermont", "delaware",
+	"american samoa", "puerto rico", "connecticut", "blank")
+
 states.output$state <- states.output$id
+map.output <- merge(fifty_states,states.output, by="id", all.x=T)
+map.output <- map.output[order(map.output$order),]
 
 ##################################################################################
 # new trail per state
+
+barplot(map.output$new.trail.per.state)
+
 SCA_50states_color(map.output, map.output$new.trail.per.state, 
 "New Trail Built in 2017", "Miles", "white", "sienna")
 
@@ -145,6 +161,9 @@ Southeast(states.output, "new.trail.per.state", title_ne = "New Trail built in 2
 
 #####################################################################
 # maintained trail per state
+
+barplot(map.output$maintain.trail.per.state)
+
 SCA_50states_color(map.output, map.output$maintain.trail.per.state, 
 "Miles of Trail Maintained in 2017", "Miles", "white", "sienna")
 
@@ -258,3 +277,182 @@ Southeast(states.output, "water.trashout.per.state", title_ne = "Miles of shorel
 SCA_50states_color(map.output, map.output$water.invasive.per.state, 
 "Miles of shoreline cleared of invasives in 2017", "Miles", "white", "blue")
 
+#####################################################################
+#Conservation impact
+order(table(SCAoutput$Conservation.Impact)
+
+# alphabetical order categories
+par(mar = (c(10, 4, 2, 2) + 0.1))
+barplot(table(SCAoutput$Conservation.Impact), las = 2, cex.names = .7,
+horiz = F, main = "2017 Conservation Impact Categories")
+
+# pie chart # avoid using!
+pie(table(SCAoutput$Conservation.Impact))
+
+# numeric order categories
+
+ppx <- table(SCAoutput$Conservation.Impact)
+ppx <- ppx[rev(order(ppx))]
+names(ppx)[14] <- "blank"
+
+par(mar = (c(10, 4, 2, 2) + 0.1))
+barplot(ppx, las = 2, cex.names = .7,
+horiz = F, main = "2017 Conservation Impact Categories", ylab = "entries")
+
+# colored by new categories
+par(mar = (c(10, 4, 2, 2) + 0.1))
+barplot(ppx, las = 2, cex.names = .7,
+horiz = F, main = "2017 Conservation Impact Categories", 
+col = c("green", "orange", "blue", "green", "orange", "blue", 
+	"green", "green", "blue", "orange", "orange", "blue", 
+	"blue", "white", "blue"), ylab = "entries")
+legend("topright", legend = c("Restoration", "Recreation", "Resilience"),
+fill = c("orange", "green", "blue"))
+
+# categories combined
+condenseCI <- rep(NA, times = 3)
+names(condenseCI) <- c("Restoration", "Recreation", "Resilience")
+
+condenseCI[1] <- ppx[2] + ppx[5] + ppx[10] + ppx[11]
+condenseCI[2] <- ppx[1] + ppx[4] + ppx[7] + ppx[8]
+condenseCI[3] <- ppx[3] + ppx[6] + ppx[9] + ppx[12] + ppx[13] + ppx[14]
+
+par(mar = c(5, 4, 4, 2) + 0.1)
+barplot(condenseCI, main = "2017 Conservation Impact Categories",
+col = c("orange", "green", "blue"), ylab = "entries")
+
+pie(condenseCI, main = "2017 SCA Project Goal Breakdown")
+
+# bad example of output categories
+names(SCAoutput)
+levels(SCAoutput$Category.of.Work.You.Did)
+SCAoutput$Category.of.Work.You.Did
+SCAoutput$How.Much.You.Did
+
+table(SCAoutput$How.Much.You.Did, SCAoutput$Category.of.Work.You.Did)
+summarise(SCAoutput$Category.of.Work.You.Did, count = sum(How.Much.You.Did))
+
+trail_rows
+land_rows
+edu_rows
+water_rows
+
+build_rows <- filter(SCAoutput, Category.of.Work.You.Did == "Building and maintaining structures (Unit: # structures)")
+summary(build_rows)
+
+cert_rows <- filter(SCAoutput, Category.of.Work.You.Did == "Certifications (Unit: # certifications)")
+summary(cert_rows)
+
+data_rows <- filter(SCAoutput, Category.of.Work.You.Did == "Collecting data (Unit: # points or samples)")
+summary(data_rows)
+
+item_rows <- filter(SCAoutput, Category.of.Work.You.Did == "Creating reports & products (Unit: # items)")
+summary(item_rows)
+
+species_rows <- filter(SCAoutput, Category.of.Work.You.Did == "Supporting native species propagation (Unit: # plants or animals)")
+summary(species_rows)
+
+
+condenseOutput <- rep(NA, times = 9)
+names(condenseOutput) <- c("structures built", "certifications", "data points",
+	"reports", "people educated", "acres land improved", "feet shore improved",
+	"feet trail improved", "plants or animals" )
+
+condenseOutput[1] <- sum(build_rows$How.Much.You.Did)
+condenseOutput[2] <- sum(cert_rows$How.Much.You.Did)
+condenseOutput[3] <- sum(data_rows$How.Much.You.Did)
+condenseOutput[4] <- sum(item_rows$How.Much.You.Did)
+condenseOutput[5] <- sum(edu_rows$How.Much.You.Did)
+condenseOutput[6] <- sum(land_rows$How.Much.You.Did)
+condenseOutput[7] <- sum(water_rows$How.Much.You.Did)
+condenseOutput[8] <- sum(trail_rows$How.Much.You.Did)
+condenseOutput[9] <- sum(species_rows$How.Much.You.Did)
+
+barplot(condenseOutput, las = 3, main = "2017 SCA output")
+
+condenseOutput[1] <- sum(build_rows$How.Much.You.Did)
+
+# trail zoom-in
+summary(trail_rows)
+summary(new_trail_rows)
+summary(maintain_trail_rows)
+trail_struc_rows <- filter(trail_rows, Sub.Category.of.work == "Installing structures (describe below)")
+step_rows <- filter(trail_rows, Sub.Category.of.work == "Installing steps or staircases")
+sign_rows <- filter(trail_rows, Sub.Category.of.work == "Signage or blazing")
+
+trail_zoom <- rep(NA, times = 5)
+names(trail_zoom) <- c("new trail", "trail manintenance", "structures", "steps", "signs")
+
+trail_zoom[1] <- sum(new_trail_rows$How.Much.You.Did)
+trail_zoom[2] <- sum(maintain_trail_rows$How.Much.You.Did)
+trail_zoom[3] <- sum(trail_struc_rows$How.Much.You.Did)
+trail_zoom[4] <- sum(step_rows$How.Much.You.Did)
+trail_zoom[5] <- sum(sign_rows$How.Much.You.Did)
+
+barplot(trail_zoom, las = 3, main = "2017 SCA Trail Work", ylab = "Feet of Trail")
+
+# species zoom-in
+summary(species_rows)
+tree_rows <- filter(species_rows, Sub.Category.of.work == "Planting trees")
+water_tree_rows <- filter(species_rows, Sub.Category.of.work == "Watering, mulching, or maintaining plants")
+non_tree_rows <- filter(species_rows, Sub.Category.of.work == "Planting vegetation (not trees)")
+animal_rows <- filter(species_rows, Sub.Category.of.work == "Feed/care of animals")
+seed_rows <- filter(species_rows, Sub.Category.of.work == "Collecting seed/cuttings")
+
+species_zoom <- rep(NA, times = 5)
+names(species_zoom) <- c("trees planted", "trees maintained", "non-trees planted",
+	"animals cared for", "seeds collected")
+
+species_zoom[1] <- sum(tree_rows$How.Much.You.Did)
+species_zoom[2] <- sum(water_tree_rows$How.Much.You.Did)
+species_zoom[3] <- sum(non_tree_rows$How.Much.You.Did)
+species_zoom[4] <- sum(animal_rows$How.Much.You.Did)
+species_zoom[5] <- sum(seed_rows$How.Much.You.Did)
+
+barplot(species_zoom, las = 3, main = "2017 SCA Species Work", ylab = "Number of animals or plants")
+
+# item zoom-in
+summary(item_rows)
+other_rows <- filter(item_rows, Sub.Category.of.work == "Other (describe below)")
+report_rows <- filter(item_rows, Sub.Category.of.work == "Report")
+media_rows <- filter(item_rows, Sub.Category.of.work == "Media content")
+outreach_rows <- filter(item_rows, Sub.Category.of.work == "Outreach material")
+lesson_rows <- filter(item_rows, Sub.Category.of.work == "Lesson/Activity")
+map_rows <- filter(item_rows, Sub.Category.of.work == "Map")
+other_other_rows <- filter(item_rows, Sub.Category.of.work == "(Other)")
+
+item_zoom <- rep(NA, times = 7)
+names(item_zoom) <- c("other 1", "report", "media", "outreach", "lesson",
+	"map", "other 2")
+
+item_zoom[1] <- sum(other_rows$How.Much.You.Did)
+item_zoom[2] <- sum(report_rows$How.Much.You.Did)
+item_zoom[3] <- sum(media_rows$How.Much.You.Did)
+item_zoom[4] <- sum(outreach_rows$How.Much.You.Did)
+item_zoom[5] <- sum(lesson_rows$How.Much.You.Did)
+item_zoom[6] <- sum(map_rows$How.Much.You.Did)
+item_zoom[7] <- sum(other_other_rows$How.Much.You.Did)
+
+barplot(item_zoom, las = 2, main = "2017 SCA products made")
+
+which(map_rows$How.Much.You.Did == 47520) # 44
+map_rows[44,]
+
+# people zoom-in
+summary(edu_rows)
+other_edu_rows <- filter(edu_rows, Sub.Category.of.work == "Other (describe below)")
+other_other_edu_rows <- filter(edu_rows, Sub.Category.of.work == "(Other)")
+
+edu_zoom <- rep(NA, times = 7)
+names(edu_zoom) <-  c("while tabling", "visitors met", "volunteers coordinated",
+	"on tours", "in classroom", "other 1", "other 2")
+
+edu_zoom[1] <- sum(tabling_rows$How.Much.You.Did)
+edu_zoom[2] <- sum(visitor_rows$How.Much.You.Did)
+edu_zoom[3] <- sum(volunteer_rows$How.Much.You.Did)
+edu_zoom[4] <- sum(tour_rows$How.Much.You.Did)
+edu_zoom[5] <- sum(curriculum_rows$How.Much.You.Did)
+edu_zoom[6] <- sum(other_edu_rows$How.Much.You.Did)
+edu_zoom[7] <- sum(other_other_edu_rows$How.Much.You.Did)
+
+barplot(edu_zoom, las = 3, main = "2017 People Engaged by SCA", ylab = "people")
