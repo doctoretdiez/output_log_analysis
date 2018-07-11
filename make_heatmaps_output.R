@@ -5,9 +5,9 @@
 #####
 ####
 
-setwd( "C:/Users/elizabethtokarz/Desktop")
+setwd( "C:/Users/elizabethtokarz/Documents")
 # read in SCA data file
-SCAoutput <- read.csv("output-log-2017.csv")
+SCAoutput <- read.csv("Cleaned_Melissa_outputs2017.csv")
 names(SCAoutput)
 summary(SCAoutput)
 
@@ -44,7 +44,7 @@ states.output$new.trail.per.state[i] <- (sum(new_trail_rows$How.Much.You.Did[whi
 }
 
 for (i in 1:length(states_vec)){
-states.output$maintain.trail.per.state[i] <- (sum(maintain_trail_rows$How.Much.You.Did[which(new_trail_rows$Position..Position.State == states_vec[i])]))/5280
+states.output$maintain.trail.per.state[i] <- (sum(maintain_trail_rows$How.Much.You.Did[which(maintain_trail_rows$Position..Position.State == states_vec[i])]))/5280
 }
 
 ############ Improving Land
@@ -116,6 +116,56 @@ for (i in 1:length(states_vec)){
 states.output$water.debris.per.state[i] <- (sum(water_debris_rows$How.Much.You.Did[which(water_debris_rows$Position..Position.State == states_vec[i])]))/5280
 }
 
+
+# Make some new variables to show how trail maps would look in the future
+states.output$new.trail.future <- states.output$new.trail.per.state
+states.output$new.trail.future[states.output$new.trail.future > 1.5] <- states.output$new.trail.future[states.output$new.trail.future > 1.5]*2
+states.output$new.trail.future[states.output$new.trail.future < 1.5] <- states.output$new.trail.future[states.output$new.trail.future < 1.5]*3.2
+states.output$new.trail.future[states.output$new.trail.future < 0.000001] <- states.output$new.trail.future[states.output$new.trail.future < 0.000001] + 0.8
+states.output$new.trail.future[c(13, 14, 24, 29, 38, 42, 44, 51, 52 ,53, 55)] <- 0
+states.output$new.trail.future[45] <- 2
+states.output$new.trail.future[30] <- 3.3
+states.output$new.trail.future[49] <- 6.8
+states.output$new.trail.future[9] <- 1.5
+states.output$new.trail.future[39] <- 4.1
+states.output$new.trail.future[40] <- 2
+states.output$new.trail.future[54] <- 1.6
+states.output$new.trail.future[46] <- 3
+states.output$new.trail.future[48] <- 0.6
+states.output$new.trail.future[51] <- 3.7
+states.output$new.trail.future[52] <- 2.5
+states.output$new.trail.future[18] <- 24
+
+states.output$maintain.trail.future <- states.output$maintain.trail.per.state
+states.output$maintain.trail.future[states.output$maintain.trail.future > 18] <- states.output$maintain.trail.future[states.output$maintain.trail.future > 18]*1.2
+states.output$maintain.trail.future[states.output$maintain.trail.future < 18] <- states.output$maintain.trail.future[states.output$maintain.trail.future < 18]*5.2
+states.output$maintain.trail.future[39] <- 10
+states.output$maintain.trail.future[47] <- 3.3
+states.output$maintain.trail.future[48] <- 5
+states.output$maintain.trail.future[50] <- 7.8
+states.output$maintain.trail.future[27] <- 1.3
+states.output$maintain.trail.future[36] <- 35
+states.output$maintain.trail.future[42] <- 56
+states.output$maintain.trail.future[45] <- 22
+states.output$maintain.trail.future[7] <- 88
+states.output$maintain.trail.future[2] <- 66
+states.output$maintain.trail.future[51] <- 18
+states.output$maintain.trail.future[37] <- 23
+states.output$maintain.trail.future[30] <- 17
+states.output$maintain.trail.future[13] <- 100
+
+sum(states.output$new.trail.per.state) # 50.44
+sum(states.output$new.trail.future) # 169.52
+sum(states.output$maintain.trail.per.state) # 3196.409
+max(states.output$maintain.trail.per.state)
+which(states.output$maintain.trail.per.state == max(states.output$maintain.trail.per.state)) #16
+states.output[16,]
+
+sum(states.output$maintain.trail.future) # 662.75
+sum(trail_rows$How.Much.You.Did)/5280
+max(trail_rows$How.Much.You.Did)/5280
+which(trail_rows$How.Much.You.Did == max(trail_rows$How.Much.You.Did)) #866, 867, 868
+trail_rows[c(866:868),]
 ###########################################
 ###########################################
 ###########################################
@@ -149,6 +199,12 @@ barplot(map.output$new.trail.per.state)
 SCA_50states_color(map.output, map.output$new.trail.per.state, 
 "New Trail Built in 2017", "Miles", "white", "sienna")
 
+SCA_50states_color(map.output, map.output$new.trail.future, 
+"Projected New SCA Trail 2017-2022", "Miles", "white", "sienna")
+
+# in five years
+map.output$new.trail.per.state
+
 Southwest(states.output, "new.trail.per.state", title_ne = "New Trail built in 2017", label_ne = "Miles")
 Midwest(states.output, "new.trail.per.state", title_ne = "New Trail built in 2017", label_ne = "Miles")
 Northeast(states.output, "new.trail.per.state", title_ne = "New Trail built in 2017", label_ne = "Miles")
@@ -167,6 +223,9 @@ barplot(map.output$maintain.trail.per.state)
 SCA_50states_color(map.output, map.output$maintain.trail.per.state, 
 "Miles of Trail Maintained in 2017", "Miles", "white", "sienna")
 
+SCA_50states_color(map.output, map.output$maintain.trail.future, 
+"Projected Maintained SCA Trail 2017-2022", "Miles", "white", "sienna")
+
 Southwest(states.output, "maintain.trail.per.state", title_ne = "Miles of Trail Maintained in 2017", label_ne = "Miles")
 Northwest(states.output, "maintain.trail.per.state", title_ne = "Miles of Trail Maintained in 2017", label_ne = "Miles")
 Pacific(states.output, "maintain.trail.per.state", title_ne = "Miles of Trail Maintained in 2017", label_ne = "Miles")
@@ -175,6 +234,8 @@ South(states.output, "maintain.trail.per.state", title_ne = "Miles of Trail Main
 Southeast(states.output, "maintain.trail.per.state", title_ne = "Miles of Trail Maintained in 2017", label_ne = "Miles")
 Midwest(states.output, "maintain.trail.per.state", title_ne = "Miles of Trail Maintained in 2017", label_ne = "Miles")
 Northeast(states.output, "maintain.trail.per.state", title_ne = "Miles of Trail Maintained in 2017", label_ne = "Miles")
+
+Midwest(states.output, "maintain.trail.future", title_ne = "Projected Miles of Trail Maintained 2017-2022", label_ne = "Miles")
 
 #####################################################################
 # acres burned per state
