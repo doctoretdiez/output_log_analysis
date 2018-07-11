@@ -34,7 +34,9 @@ library(dplyr)
 trail_rows <- filter(SCAoutput, Category.of.Work.You.Did == "Improving trail (Unit: # feet)")
 summary(trail_rows)
 new_trail_rows <- filter(trail_rows, Sub.Category.of.work == "Building new trail")
-names(new_trail_rows)
+summary(new_trail_rows)
+non_new_trail_rows <- filter(trail_rows, Sub.Category.of.work != "Building new trail")
+summary(non_new_trail_rows)
 maintain_trail_rows <- filter(trail_rows, Sub.Category.of.work == "Blowdown, brushing, or widening")
 summary(maintain_trail_rows)
 
@@ -46,6 +48,11 @@ states.output$new.trail.per.state[i] <- (sum(new_trail_rows$How.Much.You.Did[whi
 for (i in 1:length(states_vec)){
 states.output$maintain.trail.per.state[i] <- (sum(maintain_trail_rows$How.Much.You.Did[which(maintain_trail_rows$Position..Position.State == states_vec[i])]))/5280
 }
+
+for (i in 1:length(states_vec)){
+states.output$non.new.trail.per.state[i] <- (sum(non_new_trail_rows$How.Much.You.Did[which(non_new_trail_rows$Position..Position.State == states_vec[i])]))/5280
+}
+
 
 ############ Improving Land
 land_rows <- filter(SCAoutput, Category.of.Work.You.Did == "Improving land (Unit: # acres)")
@@ -122,7 +129,7 @@ states.output$new.trail.future <- states.output$new.trail.per.state
 states.output$new.trail.future[states.output$new.trail.future > 1.5] <- states.output$new.trail.future[states.output$new.trail.future > 1.5]*2
 states.output$new.trail.future[states.output$new.trail.future < 1.5] <- states.output$new.trail.future[states.output$new.trail.future < 1.5]*3.2
 states.output$new.trail.future[states.output$new.trail.future < 0.000001] <- states.output$new.trail.future[states.output$new.trail.future < 0.000001] + 0.8
-states.output$new.trail.future[c(13, 14, 24, 29, 38, 42, 44, 51, 52 ,53, 55)] <- 0
+states.output$new.trail.future[c(13, 14, 24, 29, 38, 42, 44, 51, 52, 53, 55)] <- 0
 states.output$new.trail.future[45] <- 2
 states.output$new.trail.future[30] <- 3.3
 states.output$new.trail.future[49] <- 6.8
@@ -134,38 +141,18 @@ states.output$new.trail.future[46] <- 3
 states.output$new.trail.future[48] <- 0.6
 states.output$new.trail.future[51] <- 3.7
 states.output$new.trail.future[52] <- 2.5
-states.output$new.trail.future[18] <- 24
+states.output$new.trail.future[4] <- 24
 
-states.output$maintain.trail.future <- states.output$maintain.trail.per.state
-states.output$maintain.trail.future[states.output$maintain.trail.future > 18] <- states.output$maintain.trail.future[states.output$maintain.trail.future > 18]*1.2
-states.output$maintain.trail.future[states.output$maintain.trail.future < 18] <- states.output$maintain.trail.future[states.output$maintain.trail.future < 18]*5.2
-states.output$maintain.trail.future[39] <- 10
-states.output$maintain.trail.future[47] <- 3.3
-states.output$maintain.trail.future[48] <- 5
-states.output$maintain.trail.future[50] <- 7.8
-states.output$maintain.trail.future[27] <- 1.3
-states.output$maintain.trail.future[36] <- 35
-states.output$maintain.trail.future[42] <- 56
-states.output$maintain.trail.future[45] <- 22
-states.output$maintain.trail.future[7] <- 88
-states.output$maintain.trail.future[2] <- 66
-states.output$maintain.trail.future[51] <- 18
-states.output$maintain.trail.future[37] <- 23
-states.output$maintain.trail.future[30] <- 17
-states.output$maintain.trail.future[13] <- 100
+states.output$non.new.trail.future <- states.output$non.new.trail.per.state
+states.output$non.new.trail.future[states.output$non.new.trail.future < 150] <- states.output$non.new.trail.future[states.output$non.new.trail.future < 150] + 100
+states.output$non.new.trail.future[c(50, 3, 17, 38, 39, 32)] <- states.output$non.new.trail.future[c(50, 3, 17, 38, 39, 32)] + 150
+states.output$non.new.trail.future[19] <- states.output$non.new.trail.future[19] + 450
+ 
 
-sum(states.output$new.trail.per.state) # 50.44
-sum(states.output$new.trail.future) # 169.52
-sum(states.output$maintain.trail.per.state) # 3196.409
-max(states.output$maintain.trail.per.state)
-which(states.output$maintain.trail.per.state == max(states.output$maintain.trail.per.state)) #16
-states.output[16,]
-
-sum(states.output$maintain.trail.future) # 662.75
-sum(trail_rows$How.Much.You.Did)/5280
-max(trail_rows$How.Much.You.Did)/5280
-which(trail_rows$How.Much.You.Did == max(trail_rows$How.Much.You.Did)) #866, 867, 868
-trail_rows[c(866:868),]
+sum(states.output$new.trail.per.state) # 50.4
+sum(states.output$new.trail.future) # 158.1
+sum(states.output$non.new.trail.per.state) # 3761.9
+sum(states.output$non.new.trail.future) # 14411.9
 ###########################################
 ###########################################
 ###########################################
@@ -175,17 +162,17 @@ trail_rows[c(866:868),]
 ########### set up 50-state map#################
 # make sure the functions have been loaded in.
 
-# very important to do this one first
-states.output$id <- c("new mexico", "alaska", "pennsylvania", "south dakota", 
-	"indiana", "north dakota", "district of colombia", "louisiana", "montana",
-	"texas", "wyoming", "florida", "california", "alabama", "arkansas", 
-	"minnesota", "colorado", "new york", "georgia", "maryland", "idaho",
-	"virginia", "washington", "maine", "oregon", "kansas", "ohio", "illinois",
-	"kentucky", "new jersey", "utah", "missouri", "massachusetts", "mississippi",
-	"west virginia", "oklahoma", "north carolina", "nebraska", "rhode island",
-	"new hampshire", "arizona", "virgin islands", "tennessee", "guam", "michigan",
-	"hawaii", "south carolina", "iowa", "wisconsin", "vermont", "delaware",
-	"american samoa", "puerto rico", "connecticut", "blank")
+# very important to do this one first # and whenever the input changes, so does the order
+states.output$id <- c("new jersey", "pennsylvania", "illinois", "new york", 
+	"virginia", "district of colombia", "maryland", "california", "texas",
+	"washington", "massachusetts", "indiana", "blank", "nebraska", "kentucky", 
+	"idaho", "alaska", "new hampshire", "west virginia", "south dakota", "wyoming",
+	"missouri", "alabama", "mississippi", "georgia", "connecticut", "ohio", 
+	"tennessee", "oregon", "louisiana", "maine", "arizona", "colorado", "vermont",
+	"montana", "north carolina", "north dakota", "oklahoma", "michigan", "utah",
+	"south carolina", "new mexico", "minnesota", "hawaii", "wisconsin", "florida",
+	"iowa", "arkansas", "guam", "nevada", "kansas", "virgin islands", "puerto rico",
+	"delaware", "rhode island")
 
 states.output$state <- states.output$id
 map.output <- merge(fifty_states,states.output, by="id", all.x=T)
@@ -236,6 +223,15 @@ Midwest(states.output, "maintain.trail.per.state", title_ne = "Miles of Trail Ma
 Northeast(states.output, "maintain.trail.per.state", title_ne = "Miles of Trail Maintained in 2017", label_ne = "Miles")
 
 Midwest(states.output, "maintain.trail.future", title_ne = "Projected Miles of Trail Maintained 2017-2022", label_ne = "Miles")
+
+#####################################################################
+# non-new trails per state (everything else)
+SCA_50states_color(map.output, map.output$non.new.trail.per.state, 
+"Trail Maintenance in 2017", "Miles", "white", "sienna")
+
+SCA_50states_color(map.output, map.output$non.new.trail.future, 
+"Projected Trail Maintenance 2017-2022", "Miles", "white", "sienna")
+
 
 #####################################################################
 # acres burned per state
@@ -517,3 +513,23 @@ edu_zoom[6] <- sum(other_edu_rows$How.Much.You.Did)
 edu_zoom[7] <- sum(other_other_edu_rows$How.Much.You.Did)
 
 barplot(edu_zoom, las = 3, main = "2017 People Engaged by SCA", ylab = "people")
+
+
+####### make a barplot of trails in past years
+annual_trail <- c(3761.9, 1893.9, 2291.7, 1439.4, 1832, 4000)
+names(annual_trail) <- c("2017", "2016", "2015", "2014", "2013", "2009")
+
+barplot(annual_trail, ylab  = "miles", main = "Trails Maintained Annually by SCA", 
+sub = "source: SCA annual reports")
+
+cum_trail <- c(3761.9+1893.9+2291.7+1439.4+1832+4000,
+			1893.9+2291.7+1439.4+1832+4000,
+			2291.7+1439.4+1832+4000,
+			1439.4+1832+4000,
+			1832+4000,
+			4000)
+names(cum_trail) <- c("2017", "2016", "2015", "2014", "2013", "2009")
+barplot(cum_trail, ylab  = "miles", main = "Cumulative SCA Trail Maintenance", 
+sub = "source: SCA annual reports")
+
+
