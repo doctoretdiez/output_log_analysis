@@ -73,6 +73,38 @@ scale_fill_gradient(low = start, high = end, na.value = "grey90") +
 }
 
 ###########################################################################
+# SCA 50 states in YlOrRd 20% quantiles ## not working quite yet...
+SCA_50states_20percent_quantile <- function(dataset, state_category, title, label, pals = "YlOrRd"){
+
+quant.df <- select(dataset, state, state_category)
+ncls <- 6
+quant.df <-  quant.df[which(!is.na(quant.df[,2])),]
+quant.df <- mutate(quant.df, 
+		pcls = cut(state_category, quantile(state_category, seq(0, 1, len = ncls)),
+	 	include.lowest = TRUE))
+
+
+gusa_quant <- left_join(dataset, quant.df, "state")
+
+ggplot(gusa_quant, aes(map_id = id)) + 
+  geom_map(aes(fill = pcls), map = fifty_states, color = "black") + 
+  expand_limits(x = fifty_states$long, y = fifty_states$lat) +
+  coord_map() +
+scale_x_continuous(breaks = NULL) + 
+  scale_y_continuous(breaks = NULL) +
+  labs(x = "", y = "") +
+  theme(legend.position = "bottom", 
+        panel.background = element_blank()) +
+	fifty_states_inset_boxes() + ggtitle(title) +
+	scale_fill_brewer(palette = pals, name = label, 
+	labels = c("Lower 20%", "Lower-Middle 20%", "Middle 20%",
+			"Upper-Middle 20%", "Upper 20%", "None"))
+
+}
+
+###
+
+###########################################################################
 #REGIONAL MAPS # unsure how to do in ggplot at the moment
 
 Northeast <- function(dataset_ne, category_ne, border_col = "green", start_col = "white", end_col = "green", title_ne, label_ne){
