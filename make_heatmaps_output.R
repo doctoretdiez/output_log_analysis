@@ -152,7 +152,7 @@ states.output$non.new.trail.future[19] <- states.output$non.new.trail.future[19]
 sum(states.output$new.trail.per.state) # 50.4
 sum(states.output$new.trail.future) # 158.1
 sum(states.output$non.new.trail.per.state) # 3761.9
-sum(states.output$non.new.trail.future) # 14411.9
+sum(states.output$non.new.trail.future) # 10111.9
 ###########################################
 ###########################################
 ###########################################
@@ -213,6 +213,31 @@ SCA_50states_color(map.output, map.output$maintain.trail.per.state,
 SCA_50states_color(map.output, map.output$maintain.trail.future, 
 "Projected Maintained SCA Trail 2017-2022", "Miles", "white", "sienna")
 
+##binned long way
+spr <- select(states.output, state, maintain.trail.per.state)
+spr <- slice(spr, 1:54)
+ncls <- 5
+spr <- mutate(spr,
+              pcls = cut(maintain.trail.per.state, quantile(maintain.trail.per.state, seq(0, 1, len = ncls)),
+                         include.lowest = TRUE))
+
+gusa_spr <- left_join(states.output, spr, "state")
+
+ggplot(gusa_spr, aes(map_id = id)) + 
+  # map points to the fifty_states shape data
+  geom_map(aes(fill = pcls), map = fifty_states, color = "black") + 
+  expand_limits(x = fifty_states$long, y = fifty_states$lat) +
+  coord_map() +
+scale_x_continuous(breaks = NULL) + 
+  scale_y_continuous(breaks = NULL) +
+  labs(x = "", y = "") +
+  theme(legend.position = "bottom", 
+        panel.background = element_blank()) +
+	fifty_states_inset_boxes() + ggtitle("2017 SCA Trail Maintained") +
+	scale_fill_brewer(palette = "YlOrRd", name = "Miles", 
+	labels = c("Lower 25%", "Lower-Middle 25%", 
+			"Upper-Middle 25%", "Upper 25%", "NA"))
+
 Southwest(states.output, "maintain.trail.per.state", title_ne = "Miles of Trail Maintained in 2017", label_ne = "Miles")
 Northwest(states.output, "maintain.trail.per.state", title_ne = "Miles of Trail Maintained in 2017", label_ne = "Miles")
 Pacific(states.output, "maintain.trail.per.state", title_ne = "Miles of Trail Maintained in 2017", label_ne = "Miles")
@@ -222,7 +247,7 @@ Southeast(states.output, "maintain.trail.per.state", title_ne = "Miles of Trail 
 Midwest(states.output, "maintain.trail.per.state", title_ne = "Miles of Trail Maintained in 2017", label_ne = "Miles")
 Northeast(states.output, "maintain.trail.per.state", title_ne = "Miles of Trail Maintained in 2017", label_ne = "Miles")
 
-Midwest(states.output, "maintain.trail.future", title_ne = "Projected Miles of Trail Maintained 2017-2022", label_ne = "Miles")
+Midwest(states.output, "non.new.trail.future", title_ne = "Projected Miles of Trail Maintained 2017-2022", label_ne = "Miles")
 
 #####################################################################
 # non-new trails per state (everything else)
@@ -232,6 +257,59 @@ SCA_50states_color(map.output, map.output$non.new.trail.per.state,
 SCA_50states_color(map.output, map.output$non.new.trail.future, 
 "Projected Trail Maintenance 2017-2022", "Miles", "white", "sienna")
 
+SCA_50states(map.output, map.output$non.new.trail.per.state, 
+"Trail Maintenance in 2017", "Miles")
+
+SCA_50states(map.output, map.output$non.new.trail.future, 
+"Projected Trail Maintenance 2017-2022", "Miles")
+
+spr <- select(states.output, state, non.new.trail.per.state)
+spr <- slice(spr, 1:54)
+ncls <- 6
+spr <- mutate(spr,
+              pcls = cut(non.new.trail.per.state, quantile(non.new.trail.per.state, seq(0, 1, len = ncls)),
+                         include.lowest = TRUE))
+
+gusa_spr <- left_join(states.output, spr, "state")
+
+ggplot(gusa_spr, aes(map_id = id)) + 
+  # map points to the fifty_states shape data
+  geom_map(aes(fill = pcls), map = fifty_states, color = "black") + 
+  expand_limits(x = fifty_states$long, y = fifty_states$lat) +
+  coord_map() +
+scale_x_continuous(breaks = NULL) + 
+  scale_y_continuous(breaks = NULL) +
+  labs(x = "", y = "") +
+  theme(legend.position = "bottom", 
+        panel.background = element_blank()) +
+	fifty_states_inset_boxes() + ggtitle("2017 SCA Trail Maintained") +
+	scale_fill_brewer(palette = "YlOrRd", name = "Miles", 
+	labels = c("Lower 20%", "Lower-Middle 20%", "Middle 20%", 
+			"Upper-Middle 20%", "Upper 20%", "NA"))
+######## projection now
+spr <- select(states.output, state, non.new.trail.future)
+spr <- slice(spr, 1:54)
+ncls <- 6
+spr <- mutate(spr,
+              pcls = cut(non.new.trail.future, quantile(non.new.trail.future, seq(0, 1, len = ncls)),
+                         include.lowest = TRUE))
+
+gusa_spr <- left_join(states.output, spr, "state")
+
+ggplot(gusa_spr, aes(map_id = id)) + 
+  # map points to the fifty_states shape data
+  geom_map(aes(fill = pcls), map = fifty_states, color = "black") + 
+  expand_limits(x = fifty_states$long, y = fifty_states$lat) +
+  coord_map() +
+scale_x_continuous(breaks = NULL) + 
+  scale_y_continuous(breaks = NULL) +
+  labs(x = "", y = "") +
+  theme(legend.position = "bottom", 
+        panel.background = element_blank()) +
+	fifty_states_inset_boxes() + ggtitle("Projected SCA Trail Maintained, 2017-2022") +
+	scale_fill_brewer(palette = "YlOrRd", name = "Miles", 
+	labels = c("Lower 20%", "Lower-Middle 20%", "Middle 20%", 
+			"Upper-Middle 20%", "Upper 20%", "NA"))
 
 #####################################################################
 # acres burned per state
