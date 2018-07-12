@@ -92,26 +92,43 @@ map.df <- map.df[order(map.df$order),]
 # openings per state
 #####################################################################
 
-SCA_50states(map.df, map.df$count.openings.per.state, "SCA Openings 2017", "Openings")
+SCA_50states(map.df, map.df$count.openings.per.state, title = "SCA Openings 2017", label = "Openings")
+
+##SCA_50states_20percent_quantile(states.df, "count.openings.per.state", title = "SCA Openings 2017", label = "Openings")
 
 Northeast(states.df, "count.openings.per.state", title_ne = "Openings in 2017", label_ne = "Openings")
 
+############### in quintiles instead of a continuous scale
+# binning long way
+
+spr <- select(states.df, state, count.openings.per.state)
+spr <- slice(spr, 1:54)
+ncls <- 6
+spr <- mutate(spr,
+              pcls = cut(count.openings.per.state, quantile(count.openings.per.state, seq(0, 1, len = ncls)),
+                         include.lowest = TRUE))
+
+gusa_spr <- left_join(states.df, spr, "state")
+
+ggplot(gusa_spr, aes(map_id = id)) + 
+  # map points to the fifty_states shape data
+  geom_map(aes(fill = pcls), map = fifty_states, color = "black") + 
+  expand_limits(x = fifty_states$long, y = fifty_states$lat) +
+  coord_map() +
+scale_x_continuous(breaks = NULL) + 
+  scale_y_continuous(breaks = NULL) +
+  labs(x = "", y = "") +
+  theme(legend.position = "bottom", 
+        panel.background = element_blank()) +
+	fifty_states_inset_boxes() + ggtitle("blank") +
+	scale_fill_brewer(palette = "YlOrRd", name = "Openings", 
+	labels = c("Lower 20%", "Lower-Middle 20%", "Middle 20%",
+			"Upper-Middle 20%", "Upper 20%", "None"))
+
+
 
 # alternative representation
-library("ggplot2")
-gusa <- map_data("state")
-states.df$state <- c("new mexico", "alaska", "pennsylvania", "south dakota", 
-	"indiana", "north dakota", "district of colombia", "louisiana", "montana",
-	"texas", "wyoming", "florida", "california", "alabama", "arkansas", 
-	"minnesota", "colorado", "new york", "georgia", "maryland", "idaho",
-	"virginia", "washington", "maine", "oregon", "kansas", "ohio", "illinois",
-	"kentucky", "new jersey", "utah", "missouri", "massachusetts", "mississippi",
-	"west virginia", "oklahoma", "north carolina", "nebraska", "rhode island",
-	"new hampshire", "arizona", "virgin islands", "tennessee", "guam", "michigan",
-	"hawaii", "south carolina", "iowa", "wisconsin", "vermont", "delaware",
-	"american samoa", "puerto rico", "connecticut", "blank")
-
-
+# centroids with proportional circles
 state_centroids <- summarize(group_by(gusa, region),
                              x = mean(range(long)), y = mean(range(lat)))
 names(state_centroids)[1] <- "state"
@@ -127,7 +144,12 @@ with(states.df,
      symbols(x, y,
              circles = sqrt(count.openings.per.state), add = TRUE,
              inches = 0.1, bg = "black"))
-# ggplot version
+
+
+# ggplot version of centroids with proportional circles
+library("ggplot2")
+gusa <- map_data("state")
+
 ggplot(gusa) +
     geom_polygon(aes(long, lat, group = group),
                  fill = NA, color = "grey") +
@@ -135,21 +157,16 @@ ggplot(gusa) +
     scale_size_area() +
     coord_map("bonne", parameters=45) 
 
-############### in quintiles instead of a continuous scale
-spr <- select(states.df, state, count.openings.per.state)
-spr <- slice(spr, 1:54)
-ncls <- 10
-spr <- mutate(spr,
-              pcls = cut(count.openings.per.state, quantile(count.openings.per.state, seq(0, 1, len = ncls)),
-                         include.lowest = TRUE))
-
-gusa_spr <- left_join(states.df, spr, "state")
-
-# with non ggplot
+##########################################
+# quintiles with non ggplot***
 map("state")$names
+# default # par(mar = c(5, 4, 4, 2) + 0.1)
 usa_pcls <- spr$pcls[match(map("state")$names, spr$state)]
 pal <- RColorBrewer::brewer.pal(nlevels(usa_pcls), "Reds")
-map("state", fill = TRUE, col = pal[usa_pcls], border = "grey")
+map("state", fill = TRUE, col = pal[usa_pcls], border = "grey", mar = c(5, 4.1, 7, 0.1))
+# make legend on its own!
+map("state", fill = T, col = "white", border = "white")
+legend("center", inset=c(0,-0.2), legend = unique(spr$pcls[order(spr$pcls)]), fill = pal, ncol = 3)
 ###### can change the color scheme based on how many ncls!!!
 
 # how to see only one state while in ggplot?
@@ -196,6 +213,31 @@ SCA_50states(map.df, map.df$count.positions, "SCA position distribution 2017", "
 # internships per state
 #####################################################################
 SCA_50states(map.df, map.df$intern, "SCA internship distribution 2017", "Positions")
+
+spr <- select(states.df, state, intern)
+spr <- slice(spr, 1:54)
+ncls <- 6
+spr <- mutate(spr,
+              pcls = cut(intern, quantile(intern, seq(0, 1, len = ncls)),
+                         include.lowest = TRUE))
+
+gusa_spr <- left_join(states.df, spr, "state")
+
+ggplot(gusa_spr, aes(map_id = id)) + 
+  # map points to the fifty_states shape data
+  geom_map(aes(fill = pcls), map = fifty_states, color = "black") + 
+  expand_limits(x = fifty_states$long, y = fifty_states$lat) +
+  coord_map() +
+scale_x_continuous(breaks = NULL) + 
+  scale_y_continuous(breaks = NULL) +
+  labs(x = "", y = "") +
+  theme(legend.position = "bottom", 
+        panel.background = element_blank()) +
+	fifty_states_inset_boxes() + ggtitle("2017 SCA Internship Distribution") +
+	scale_fill_brewer(palette = "YlOrRd", name = "Openings"), 
+	labels = c("Lower 20%", "Lower-Middle 20%", "Middle 20%",
+			"Upper-Middle 20%", "Upper 20%", "None"))
+
 
 #####################################################################
 # crew openings per state
