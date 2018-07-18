@@ -428,7 +428,7 @@ pie(table(SCAoutput$Conservation.Impact))
 
 ppx <- table(SCAoutput$Conservation.Impact)
 ppx <- ppx[rev(order(ppx))]
-names(ppx)[14] <- "blank"
+names(ppx)[4] <- "blank"
 
 par(mar = (c(10, 4, 2, 2) + 0.1))
 barplot(ppx, las = 2, cex.names = .7,
@@ -438,9 +438,9 @@ horiz = F, main = "2017 Conservation Impact Categories", ylab = "entries")
 par(mar = (c(10, 4, 2, 2) + 0.1))
 barplot(ppx, las = 2, cex.names = .7,
 horiz = F, main = "2017 Conservation Impact Categories", 
-col = c("green", "orange", "blue", "green", "orange", "blue", 
-	"green", "green", "blue", "orange", "orange", "blue", 
-	"blue", "white", "blue"), ylab = "entries")
+col = c("green", "blue", "orange", "white", "orange", "green", 
+	"blue", "green", "green", "blue", "orange", "orange", 
+	"blue", "blue", "blue"), ylab = "entries")
 legend("topright", legend = c("Restoration", "Recreation", "Resilience"),
 fill = c("orange", "green", "blue"))
 
@@ -448,15 +448,16 @@ fill = c("orange", "green", "blue"))
 condenseCI <- rep(NA, times = 3)
 names(condenseCI) <- c("Restoration", "Recreation", "Resilience")
 
-condenseCI[1] <- ppx[2] + ppx[5] + ppx[10] + ppx[11]
-condenseCI[2] <- ppx[1] + ppx[4] + ppx[7] + ppx[8]
-condenseCI[3] <- ppx[3] + ppx[6] + ppx[9] + ppx[12] + ppx[13] + ppx[14]
+condenseCI[1] <- ppx[3] + ppx[5] + ppx[11] + ppx[12]
+condenseCI[2] <- ppx[1] + ppx[6] + ppx[8] + ppx[9]
+condenseCI[3] <- ppx[2] + ppx[7] + ppx[10] + ppx[13] + ppx[14] + ppx[15]
 
 par(mar = c(5, 4, 4, 2) + 0.1)
 barplot(condenseCI, main = "2017 Conservation Impact Categories",
 col = c("orange", "green", "blue"), ylab = "entries")
 
-pie(condenseCI, main = "2017 SCA Project Goal Breakdown")
+pie(condenseCI, main = "2017 SCA Conservation Impact", 
+col = c("orange", "green", "blue"))
 
 # bad example of output categories
 names(SCAoutput)
@@ -503,8 +504,9 @@ condenseOutput[7] <- sum(water_rows$How.Much.You.Did)
 condenseOutput[8] <- sum(trail_rows$How.Much.You.Did)
 condenseOutput[9] <- sum(species_rows$How.Much.You.Did)
 
-barplot(condenseOutput, las = 3, main = "2017 SCA output")
+par(mar = (c(10, 4, 2, 2) + 0.1))
 
+barplot(condenseOutput, las = 3, main = "2017 SCA output")
 condenseOutput[1] <- sum(build_rows$How.Much.You.Did)
 
 # trail zoom-in
