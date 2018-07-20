@@ -161,6 +161,7 @@ sum(states.output$non.new.trail.future) # 10111.9
 ###########################################
 ########### set up 50-state map#################
 # make sure the functions have been loaded in.
+library(fiftystater)
 
 # very important to do this one first # and whenever the input changes, so does the order
 states.output$id <- c("new jersey", "pennsylvania", "illinois", "new york", 
@@ -421,6 +422,12 @@ par(mar = (c(10, 4, 2, 2) + 0.1))
 barplot(table(SCAoutput$Conservation.Impact), las = 2, cex.names = .7,
 horiz = F, main = "2017 Conservation Impact Categories")
 
+# flip it!
+par(mar = (c(4, 10, 2, 2) + 0.1))
+barplot(table(SCAoutput$Conservation.Impact), las = 1, cex.names = .7,
+horiz = T, main = "2017 Conservation Impact Categories")
+
+
 # pie chart # avoid using!
 pie(table(SCAoutput$Conservation.Impact))
 
@@ -434,15 +441,29 @@ par(mar = (c(10, 4, 2, 2) + 0.1))
 barplot(ppx, las = 2, cex.names = .7,
 horiz = F, main = "2017 Conservation Impact Categories", ylab = "entries")
 
+par(mar = (c(4, 10, 2, 2) + 0.1))
+barplot(ppx, las = 1, cex.names = .7,
+horiz = T, main = "2017 Conservation Impact Categories", xlab = "entries")
+
 # colored by new categories
 par(mar = (c(10, 4, 2, 2) + 0.1))
 barplot(ppx, las = 2, cex.names = .7,
 horiz = F, main = "2017 Conservation Impact Categories", 
-col = c("green", "blue", "orange", "white", "orange", "green", 
-	"blue", "green", "green", "blue", "orange", "orange", 
+col = c("forestgreen", "blue", "orange", "white", "orange", "forestgreen", 
+	"blue", "forestgreen", "forestgreen", "blue", "orange", "orange", 
 	"blue", "blue", "blue"), ylab = "entries")
 legend("topright", legend = c("Restoration", "Recreation", "Resilience"),
-fill = c("orange", "green", "blue"))
+fill = c("orange", "forestgreen", "blue"))
+
+par(mar = (c(4, 10, 2, 2) + 0.1))
+barplot(ppx, las = 1, cex.names = .7,
+horiz = T, main = "2017 Conservation Impact Categories", 
+col = c("forestgreen", "blue", "orange", "white", "orange", "forestgreen", 
+	"blue", "forestgreen", "forestgreen", "blue", "orange", "orange", 
+	"blue", "blue", "blue"), xlab = "entries")
+legend("topright", legend = c("Restoration", "Recreation", "Resilience"),
+fill = c("orange", "forestgreen", "blue"))
+
 
 # categories combined
 condenseCI <- rep(NA, times = 3)
@@ -454,10 +475,10 @@ condenseCI[3] <- ppx[2] + ppx[7] + ppx[10] + ppx[13] + ppx[14] + ppx[15]
 
 par(mar = c(5, 4, 4, 2) + 0.1)
 barplot(condenseCI, main = "2017 Conservation Impact Categories",
-col = c("orange", "green", "blue"), ylab = "entries")
+col = c("orange", "forestgreen", "blue"), ylab = "entries")
 
 pie(condenseCI, main = "2017 SCA Conservation Impact", 
-col = c("orange", "green", "blue"))
+col = c("orange", "forestgreen", "blue"))
 
 # bad example of output categories
 names(SCAoutput)
@@ -505,8 +526,12 @@ condenseOutput[8] <- sum(trail_rows$How.Much.You.Did)
 condenseOutput[9] <- sum(species_rows$How.Much.You.Did)
 
 par(mar = (c(10, 4, 2, 2) + 0.1))
-
 barplot(condenseOutput, las = 3, main = "2017 SCA output")
+condenseOutput[1] <- sum(build_rows$How.Much.You.Did)
+
+#flip
+par(mar = (c(4, 10, 2, 2) + 0.1))
+barplot(condenseOutput, las = 1, main = "2017 SCA output", horiz = T)
 condenseOutput[1] <- sum(build_rows$How.Much.You.Did)
 
 # trail zoom-in
@@ -528,6 +553,10 @@ trail_zoom[5] <- sum(sign_rows$How.Much.You.Did)
 
 barplot(trail_zoom, las = 3, main = "2017 SCA Trail Work", ylab = "Feet of Trail")
 
+par(mar = (c(4, 10, 2, 2) + 0.1))
+barplot(trail_zoom, las = 1, horiz = T, main = "2017 SCA Trail Work", xlab = "Feet of Trail")
+
+
 # species zoom-in
 summary(species_rows)
 tree_rows <- filter(species_rows, Sub.Category.of.work == "Planting trees")
@@ -546,7 +575,8 @@ species_zoom[3] <- sum(non_tree_rows$How.Much.You.Did)
 species_zoom[4] <- sum(animal_rows$How.Much.You.Did)
 species_zoom[5] <- sum(seed_rows$How.Much.You.Did)
 
-barplot(species_zoom, las = 3, main = "2017 SCA Species Work", ylab = "Number of animals or plants")
+par(mar = (c(4, 10, 2, 2) + 0.1))
+barplot(species_zoom, las = 1, horiz = T, main = "2017 SCA Species Work", xlab = "Number of animals or plants")
 
 # item zoom-in
 summary(item_rows)
@@ -572,6 +602,9 @@ item_zoom[7] <- sum(other_other_rows$How.Much.You.Did)
 
 barplot(item_zoom, las = 2, main = "2017 SCA products made")
 
+par(mar = (c(4, 10, 2, 2) + 0.1))
+barplot(item_zoom, las = 1, horiz = T, main = "2017 SCA products made")
+
 which(map_rows$How.Much.You.Did == 47520) # 44
 map_rows[44,]
 
@@ -594,6 +627,8 @@ edu_zoom[7] <- sum(other_other_edu_rows$How.Much.You.Did)
 
 barplot(edu_zoom, las = 3, main = "2017 People Engaged by SCA", ylab = "people")
 
+par(mar = (c(4, 10, 2, 2) + 0.1))
+barplot(edu_zoom, las = 1, horiz = T, main = "2017 People Engaged by SCA", xlab = "people")
 
 ####### make a barplot of trails in past years
 annual_trail <- c(3761.9, 1893.9, 2291.7, 1439.4, 1832, 4000)
@@ -612,4 +647,116 @@ names(cum_trail) <- c("2017", "2016", "2015", "2014", "2013", "2009")
 barplot(cum_trail, ylab  = "miles", main = "Cumulative SCA Trail Maintenance", 
 sub = "source: SCA annual reports")
 
+
+################## Three Rs Heatmaps, start 
+SCAoutput$Conservation.Impact
+
+for (i in 1:length(states_vec)){
+states.output$restoration.per.state[i] <- (sum(SCAoutput$Conservation.Impact[which(SCAoutput$Position..Position.State == states_vec[i])]== "Coastal & marine restoration") +
+							sum(SCAoutput$Conservation.Impact[which(SCAoutput$Position..Position.State == states_vec[i])]== "Endangered & threatened species") +
+							sum(SCAoutput$Conservation.Impact[which(SCAoutput$Position..Position.State == states_vec[i])]== "Habitat restoration") +
+							sum(SCAoutput$Conservation.Impact[which(SCAoutput$Position..Position.State == states_vec[i])]== "Water conservation"))
+}
+
+for (i in 1:length(states_vec)){
+states.output$recreation.per.state[i] <- (sum(SCAoutput$Conservation.Impact[which(SCAoutput$Position..Position.State == states_vec[i])]== "Cultural preservation") +
+							sum(SCAoutput$Conservation.Impact[which(SCAoutput$Position..Position.State == states_vec[i])]== "Equal access to nature") +
+							sum(SCAoutput$Conservation.Impact[which(SCAoutput$Position..Position.State == states_vec[i])]== "Historic preservation") +
+							sum(SCAoutput$Conservation.Impact[which(SCAoutput$Position..Position.State == states_vec[i])]== "Recreation & visitor access"))
+}
+
+for (i in 1:length(states_vec)){
+states.output$resilience.per.state[i] <- (sum(SCAoutput$Conservation.Impact[which(SCAoutput$Position..Position.State == states_vec[i])]== "Business sustainability") +
+							sum(SCAoutput$Conservation.Impact[which(SCAoutput$Position..Position.State == states_vec[i])]== "Building conservation awareness") +
+							sum(SCAoutput$Conservation.Impact[which(SCAoutput$Position..Position.State == states_vec[i])]== "Climate Change & resiliency") +
+							sum(SCAoutput$Conservation.Impact[which(SCAoutput$Position..Position.State == states_vec[i])]== "Energy") +
+							sum(SCAoutput$Conservation.Impact[which(SCAoutput$Position..Position.State == states_vec[i])]== "Food systems") +
+							sum(SCAoutput$Conservation.Impact[which(SCAoutput$Position..Position.State == states_vec[i])]== "Wildfire mitigation"))
+}
+
+
+
+SCA_50states(states.output, states.output$restoration.per.state, "2017 SCA Restoration Projects", "entries")
+
+SCA_50states(states.output, states.output$recreation.per.state, "2017 SCA Recreation Projects", "entries")
+
+SCA_50states(states.output, states.output$resilience.per.state, "2017 SCA Resilience Projects", "entries")
+
+
+# binning
+# binning long way
+
+spr <- select(states.output, state, restoration.per.state)
+#spr <- slice(spr, 1:54)
+ncls <- 6
+spr <- mutate(spr,
+              pcls = cut(restoration.per.state, quantile(restoration.per.state, seq(0, 1, len = ncls)),
+                         include.lowest = TRUE))
+
+gusa_spr <- left_join(states.output, spr, "state")
+
+ggplot(gusa_spr, aes(map_id = id)) + 
+  # map points to the fifty_states shape data
+  geom_map(aes(fill = pcls), map = fifty_states, color = "black") + 
+  expand_limits(x = fifty_states$long, y = fifty_states$lat) +
+  coord_map() +
+scale_x_continuous(breaks = NULL) + 
+  scale_y_continuous(breaks = NULL) +
+  labs(x = "", y = "") +
+  theme(legend.position = "bottom", 
+        panel.background = element_blank()) +
+	fifty_states_inset_boxes() + ggtitle("2017 SCA Restoration Projects") +
+	scale_fill_brewer(palette = "YlOrRd", name = "Entries", 
+	labels = c("Lower 20%", "Lower-Middle 20%", "Middle 20%",
+			"Upper-Middle 20%", "Upper 20%", "None"))
+
+###################################
+spr <- select(states.output, state, recreation.per.state)
+#spr <- slice(spr, 1:54)
+ncls <- 6
+spr <- mutate(spr,
+              pcls = cut(recreation.per.state, quantile(recreation.per.state, seq(0, 1, len = ncls)),
+                         include.lowest = TRUE))
+
+gusa_spr <- left_join(states.output, spr, "state")
+
+ggplot(gusa_spr, aes(map_id = id)) + 
+  # map points to the fifty_states shape data
+  geom_map(aes(fill = pcls), map = fifty_states, color = "black") + 
+  expand_limits(x = fifty_states$long, y = fifty_states$lat) +
+  coord_map() +
+scale_x_continuous(breaks = NULL) + 
+  scale_y_continuous(breaks = NULL) +
+  labs(x = "", y = "") +
+  theme(legend.position = "bottom", 
+        panel.background = element_blank()) +
+	fifty_states_inset_boxes() + ggtitle("2017 SCA Recreation Projects") +
+	scale_fill_brewer(palette = "YlOrRd", name = "Entries", 
+	labels = c("Lower 20%", "Lower-Middle 20%", "Middle 20%",
+			"Upper-Middle 20%", "Upper 20%", "None"))
+
+###################################
+spr <- select(states.output, state, resilience.per.state)
+#spr <- slice(spr, 1:54)
+ncls <- 6
+spr <- mutate(spr,
+              pcls = cut(resilience.per.state, quantile(resilience.per.state, seq(0, 1, len = ncls)),
+                         include.lowest = TRUE))
+
+gusa_spr <- left_join(states.output, spr, "state")
+
+ggplot(gusa_spr, aes(map_id = id)) + 
+  # map points to the fifty_states shape data
+  geom_map(aes(fill = pcls), map = fifty_states, color = "black") + 
+  expand_limits(x = fifty_states$long, y = fifty_states$lat) +
+  coord_map() +
+scale_x_continuous(breaks = NULL) + 
+  scale_y_continuous(breaks = NULL) +
+  labs(x = "", y = "") +
+  theme(legend.position = "bottom", 
+        panel.background = element_blank()) +
+	fifty_states_inset_boxes() + ggtitle("2017 SCA Resilience Projects") +
+	scale_fill_brewer(palette = "YlOrRd", name = "Entries", 
+	labels = c("Lower 20%", "Lower-Middle 20%", "Middle 20%",
+			"Upper-Middle 20%", "Upper 20%", "None"))
 
