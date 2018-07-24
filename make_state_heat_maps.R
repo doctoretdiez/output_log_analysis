@@ -120,7 +120,7 @@ scale_x_continuous(breaks = NULL) +
   labs(x = "", y = "") +
   theme(legend.position = "bottom", 
         panel.background = element_blank()) +
-	fifty_states_inset_boxes() + ggtitle("blank") +
+	fifty_states_inset_boxes() + ggtitle("SCA Openings 2017") +
 	scale_fill_brewer(palette = "YlOrRd", name = "Openings", 
 	labels = c("Lower 20%", "Lower-Middle 20%", "Middle 20%",
 			"Upper-Middle 20%", "Upper 20%", "None"))

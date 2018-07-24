@@ -759,4 +759,3 @@ scale_x_continuous(breaks = NULL) +
 	scale_fill_brewer(palette = "YlOrRd", name = "Entries", 
 	labels = c("Lower 20%", "Lower-Middle 20%", "Middle 20%",
 			"Upper-Middle 20%", "Upper 20%", "None"))
-
