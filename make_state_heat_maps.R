@@ -100,9 +100,14 @@ Northeast(states.df, "count.openings.per.state", title_ne = "Openings in 2017", 
 
 ############### in quintiles instead of a continuous scale
 # binning long way
+SCA_50states_20percent_quantile_positions(states.df[1:54,], states.df$count.openings.per.state[1:54], "SCA Openings 2017", "Openings")
+summary(states.df)
+
 
 spr <- select(states.df, state, count.openings.per.state)
 spr <- slice(spr, 1:54)
+
+
 ncls <- 6
 spr <- mutate(spr,
               pcls = cut(count.openings.per.state, quantile(count.openings.per.state, seq(0, 1, len = ncls)),
@@ -124,6 +129,7 @@ scale_x_continuous(breaks = NULL) +
 	scale_fill_brewer(palette = "YlOrRd", name = "Openings", 
 	labels = c("Lower 20%", "Lower-Middle 20%", "Middle 20%",
 			"Upper-Middle 20%", "Upper 20%", "None"))
+
 
 
 
