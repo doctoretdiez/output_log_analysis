@@ -534,6 +534,14 @@ par(mar = (c(4, 10, 2, 2) + 0.1))
 barplot(condenseOutput, las = 1, main = "2017 SCA output", horiz = T)
 condenseOutput[1] <- sum(build_rows$How.Much.You.Did)
 
+# try with miles of trail instead of feet
+condenseOutput[8] <- condenseOutput[8]/5280
+par(mar = (c(4, 10, 2, 2) + 0.1))
+barplot(condenseOutput, las = 1, main = "2017 SCA output", horiz = T)
+condenseOutput[1] <- sum(build_rows$How.Much.You.Did)
+
+
+
 # trail zoom-in
 summary(trail_rows)
 summary(new_trail_rows)
