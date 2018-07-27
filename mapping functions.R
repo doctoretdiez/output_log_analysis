@@ -73,18 +73,18 @@ scale_fill_gradient(low = start, high = end, na.value = "grey90") +
 }
 
 ###########################################################################
-# SCA 50 states in YlOrRd 20% quantiles ## not working quite yet...
-SCA_50states_20percent_quantile <- function(dataset, state_category, title, label, pals = "YlOrRd"){
+#quant.df <-  quant.df[which(!is.na(quant.df[,2])),]
 
+# SCA 50 states in YlOrRd 20% quantiles ## not working quite yet...
 quant.df <- select(dataset, state, state_category)
 ncls <- 6
-quant.df <-  quant.df[which(!is.na(quant.df[,2])),]
-quant.df <- mutate(quant.df, 
+quant.df <- mutate(dataset, 
 		pcls = cut(state_category, quantile(state_category, seq(0, 1, len = ncls)),
 	 	include.lowest = TRUE))
 
+SCA_50states_20percent_quantile_map <- function(dataset, state_pcls, title, label, pals = "YlOrRd"){
 
-gusa_quant <- left_join(dataset, quant.df, "state")
+gusa_quant <- left_join(dataset, state_pcls, "state")
 
 ggplot(gusa_quant, aes(map_id = id)) + 
   geom_map(aes(fill = pcls), map = fifty_states, color = "black") + 
