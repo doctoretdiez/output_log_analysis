@@ -12,16 +12,22 @@
 # IV. Making "Three R" Heat Maps.
 #
 # But before these sections begin, some mapping code needs to be run.
-# Here it is directly below the several lines of pound signs.
+# The starter code is directly below the several lines of pound signs.
+# The starter code takes up about half this file. You can highlight all
+#  of it and let it run.
 
 # All annotations will be written following pound signs.
 # The pound sign tells R not to read that line and not to process it.
 
 # First run the following lines of code to load 
-# the necessary packages and functions
+# the necessary packages and functions.
 
-# To run the code, place the cursor at the front of the line and 
+# To run the code, place the cursor at the front of the line or highlight
+# the code you want to run and 
 # type Ctrl + R or Ctrl + Enter (different computers may be set up differently)
+
+# If it works, the R console window should run through the code and return 
+# graphics when you get to that part.
 ###########################################################################
 ###########################################################################
 ###########################################################################
@@ -220,20 +226,67 @@ scale_x_continuous(breaks = NULL) +
 
 }
 
+
+#### Starter code ends here
 ##############################################################################
 ###########################################################################
+# Quick explanation on how you will use the mapping functions that were loaded
+# above. The functions are already filled in in this file, but if you would
+# like to make new maps, this is generally what each input does for the mapping
+# functions.
+#
+# CONTINUOUS HEAT MAPS
+# SCA_50states: make a continuous heat map with a "reverse heat color palette"
+# input (dataset, column, title, unit label)
+# SCA_50states_rb: make a continuous heat map with a rainbow color palette (orange to red)
+# input (dataset, column, title, unit label)
+# SCA_50states_color: make a continuous heat map with colors of your choice
+# input (dataset, column, title, unit label, start color, end color)
+
+# The below REGION functions map SCA CPC regions
+# Northeast 
+# input (dataset, column,  border_col if not light green, start_col if not white, end_col  if not light green, title, unit label)
+# Southeast
+# input (dataset, column,  border_col if not dark green, start_col if not white, end_col  if not dark green, title, unit label)
+# Midwest
+# input (dataset, column,  border_col if not salmon, start_col if not white, end_col  if not salmon, title, unit label)
+# South
+# input (dataset, column,  border_col if not red, start_col if not white, end_col  if not red, title, unit label)
+# Mountains
+# input (dataset, column,  border_col if not light blue, start_col if not white, end_col  if not light blue, title, unit label)
+# Southwest
+# input (dataset, column,  border_col if not blue, start_col if not white, end_col  if not blue, title, unit label)
+# Northwest
+# input (dataset, column,  border_col if not dark blue, start_col if not white, end_col  if not dark blue, title, unit label)
+# Pacific
+# input (dataset, column,  border_col if not turquiose, start_col if not white, end_col  if not turquoise, title, unit label)
+
+# DISCRETE HEAT MAP
+# SCA_50states_20percent_quantile_map
+# input(dataset, state percentiles, title, unit label, palette if not pale yellow to dark red)
 ###########################################################################
 ###########################################################################
 ###########################################################################
 ###########################################################################
 ######### Now that the packages and map functions have been loaded, 
 # we can load the data
+# The most important thing you have to do to make this work, is to
+# save the files "report1529602920161_R_use.csv" and 
+# "Cleaned_Melissa_outputs2017.csv" in a folder on your computer
+# and set the working directory in R to that folder in your computer
+# where the files are stored.
 
 # I. First let's load the Positions document to make maps for openings in 2017
 
 # This below function sets the working directory, which differs by computer
-# Pick a place in your computer to store the positions document
 setwd( "C:/Users/elizabethtokarz/Desktop")
+
+# Check that the directory is right
+getwd()
+
+# If this returns the folder where you are storing the files, 
+# then you should be able to run the rest of the code with no problems.
+
 # read in SCA data file
 # if you change the name of the position file, or use a different one,
 # be sure to change the name below when reading in the csv
@@ -244,7 +297,6 @@ SCA <- read.csv("report1529602920161_R_use.csv")
 # of openings and weeks spent by SCA members per state
 # make a new column with number of weeks completed by all members
 SCA$Member.Weeks <- SCA$Actual.Number.of.Openings*SCA$Duration.In.Weeks
-table(SCA$Position.State, SCA$Actual.Number.of.Openings)
 
 # make some new vectors to organize our data
 states_vec <- unique(SCA$Position.State)
@@ -265,7 +317,6 @@ states.df$count.weeks.per.state[i] <- (sum(SCA$Member.Weeks[which(SCA$Position.S
 
 ### Do the same for the different program types
 # make another set of new columns for opening types.
-library(dplyr)
 internSCA <- filter(SCA, Conservation.Request.Type == "Internships")
 crewSCA <- filter(SCA, Conservation.Request.Type == "Crew")
 corpsSCA <- filter(SCA, Conservation.Request.Type == "Corps")
@@ -310,13 +361,13 @@ SCA_50states(map.df, map.df$count.openings.per.state, title = "SCA Openings 2017
 Northeast(states.df, "count.openings.per.state", title_ne = "Openings in 2017", label_ne = "Openings")
 
 # Discrete version Openings Map ########### Run all the below
-spr <- select(states.df, state, count.openings.per.state)
-spr <- slice(spr, 1:54)
+spr4 <- select(states.df, state, count.openings.per.state)
+spr4 <- slice(spr4, 1:54)
 ncls <- 6
-spr <- mutate(spr,
+spr4 <- mutate(spr4,
               pcls = cut(count.openings.per.state, quantile(count.openings.per.state, seq(0, 1, len = ncls)),
                          include.lowest = TRUE))
-SCA_50states_20percent_quantile_map(states.output, spr, "SCA Openings 2017", "Openings")
+SCA_50states_20percent_quantile_map(states.df, spr4, "SCA Openings 2017", "Openings")
 
 
 ############# Weeks worked in each state
@@ -324,6 +375,17 @@ SCA_50states_20percent_quantile_map(states.output, spr, "SCA Openings 2017", "Op
 SCA_50states(map.df, map.df$count.weeks.per.state, "SCA Weeks 2017", "weeks")
 
 Pacific(states.df, "count.weeks.per.state", title_ne = "SCA weeks in 2017", label_ne = "Weeks")
+
+### Look at representation of different programs in each state
+# I will use the rainbow color scheme here
+SCA_50states_rb(map.df, map.df$intern, "SCA Interns 2017", "Interns")
+
+SCA_50states_rb(map.df, map.df$community, "SCA Community programs 2017", "Members")
+
+SCA_50states_rb(map.df, map.df$corps, "SCA Corps 2017", "Members")
+Northeast(map.df, "corps", title_ne = "SCA Corps 2017", label_ne = "Members")
+
+SCA_50states_rb(map.df, map.df$crew, "SCA Crews 2017", "Members")
 
 #########
 ####### II. Second let's load the Output document to make maps for 2017
@@ -416,13 +478,13 @@ Midwest(states.output, "maintain.trail.per.state", title_ne = "Miles of Trail Ma
 Northeast(states.output, "maintain.trail.per.state", title_ne = "Miles of Trail Maintained in 2017", label_ne = "Miles")
 
 ### Discrete Maintained Trail Map########################################
-spr <- select(states.output, state, non.new.trail.per.state)
-spr <- slice(spr, 1:54)
+spr5 <- select(states.output, state, non.new.trail.per.state)
+spr5 <- slice(spr5, 1:54)
 ncls <- 6
-spr <- mutate(spr,
+spr5 <- mutate(spr5,
               pcls = cut(non.new.trail.per.state, quantile(non.new.trail.per.state, seq(0, 1, len = ncls)),
                          include.lowest = TRUE))
-SCA_50states_20percent_quantile_map(states.output, spr, "2017 SCA Trail Maintained", "Miles")
+SCA_50states_20percent_quantile_map(states.output, spr5, "2017 SCA Trail Maintained", "Miles")
 
 ########## III. Third, Look at the Conservation Impact
 # also in the SCAoutput data frame
